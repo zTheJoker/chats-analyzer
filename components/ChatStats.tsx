@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 import InactivityPeriods from './InactivityPeriods'
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card'
 import UserStatsCard from './UserStatsCard'
+import { ChevronUp, ChevronDown } from 'lucide-react'
 
 interface ChatStatsProps {
   chatData: ChatData
@@ -13,6 +14,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d'
 
 const ChatStats: React.FC<ChatStatsProps> = ({ chatData }) => {
   const [selectedUser, setSelectedUser] = useState<string>('All Users')
+  const [showAllUsers, setShowAllUsers] = useState(false)
 
   const userOptions = ['All Users', ...Object.keys(chatData.userStats)]
 
@@ -170,16 +172,31 @@ const ChatStats: React.FC<ChatStatsProps> = ({ chatData }) => {
       <div>
         <h3 className="text-2xl font-semibold mb-4">User Statistics</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Object.entries(chatData.userStats).map(([user, stats]) => (
-            <UserStatsCard
-              key={user}
-              user={user}
-              stats={stats}
-              uniqueWords={chatData.uniqueWordsPerUser[user]}
-              totalMessages={chatData.totalMessages}
-            />
-          ))}
+          {Object.entries(chatData.userStats)
+            .sort(([, a], [, b]) => b.messageCount - a.messageCount)
+            .slice(0, showAllUsers ? undefined : 3)
+            .map(([user, stats]) => (
+              <UserStatsCard
+                key={user}
+                user={user}
+                stats={stats}
+                uniqueWords={chatData.uniqueWordsPerUser[user]}
+                totalMessages={chatData.totalMessages}
+              />
+            ))}
         </div>
+        {Object.keys(chatData.userStats).length > 3 && (
+          <button
+            onClick={() => setShowAllUsers(!showAllUsers)}
+            className="w-full mt-4 py-3 px-4 bg-gray-50 hover:bg-gray-100 rounded-xl text-gray-700 font-medium flex items-center justify-center gap-2 transition-colors border border-gray-200"
+          >
+            {showAllUsers ? (
+              <>Show Less <ChevronUp className="w-4 h-4" /></>
+            ) : (
+              <>Show More Users <ChevronDown className="w-4 h-4" /></>
+            )}
+          </button>
+        )}
       </div>
       <InactivityPeriods biggestTimeStop={chatData.biggestTimeStop} />
     </div>

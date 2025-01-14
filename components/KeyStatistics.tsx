@@ -19,8 +19,6 @@ interface KeyStatisticsProps {
 }
 
 const KeyStatistics: React.FC<KeyStatisticsProps> = ({ chatData, emojiStats }) => {
-  const [showAllUsers, setShowAllUsers] = useState(false)
-
   // Calculate per-user statistics
   const userKeyStats: UserKeyStats[] = Object.entries(chatData.userStats)
     .map(([user, stats]) => {
@@ -47,10 +45,8 @@ const KeyStatistics: React.FC<KeyStatisticsProps> = ({ chatData, emojiStats }) =
     })
     .sort((a, b) => b.messageCount - a.messageCount)
 
-  const displayedUsers = showAllUsers ? userKeyStats : userKeyStats.slice(0, 5)
-  
   // Prepare data for bar charts
-  const messageData = displayedUsers.map(stats => ({
+  const messageData = userKeyStats.map(stats => ({
     name: stats.user,
     Messages: stats.messageCount,
     Words: stats.wordCount,
@@ -142,60 +138,6 @@ const KeyStatistics: React.FC<KeyStatisticsProps> = ({ chatData, emojiStats }) =
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
-
-      {/* Detailed User Stats */}
-      <div className="space-y-4">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Detailed User Statistics</h3>
-        
-        {displayedUsers.map((stats, index) => (
-          <div 
-            key={stats.user}
-            className="bg-gray-50 rounded-xl p-6 transition-all hover:bg-gray-100 border border-gray-200"
-          >
-            <div className="flex justify-between items-start mb-3">
-              <h4 className="text-lg font-semibold text-gray-800">
-                {stats.user}
-                {index === 0 && <span className="ml-2 text-sm text-blue-600">Most Active</span>}
-              </h4>
-              <span className="text-sm text-gray-500">
-                {((stats.messageCount / chatData.totalMessages) * 100).toFixed(1)}% of total
-              </span>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className="text-sm text-gray-600">Messages</p>
-                <p className="text-xl font-medium text-gray-900">{stats.messageCount.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Words</p>
-                <p className="text-xl font-medium text-gray-900">{stats.wordCount.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Unique Words</p>
-                <p className="text-xl font-medium text-gray-900">{stats.uniqueWords.size.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Emojis Used</p>
-                <p className="text-xl font-medium text-gray-900">{stats.emojiCount.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {userKeyStats.length > 5 && (
-          <button
-            onClick={() => setShowAllUsers(!showAllUsers)}
-            className="w-full mt-4 py-3 px-4 bg-gray-50 hover:bg-gray-100 rounded-xl text-gray-700 font-medium flex items-center justify-center gap-2 transition-colors border border-gray-200"
-          >
-            {showAllUsers ? (
-              <>Show Less <ChevronUp className="w-4 h-4" /></>
-            ) : (
-              <>Show All Users <ChevronDown className="w-4 h-4" /></>
-            )}
-          </button>
-        )}
       </div>
     </div>
   )
