@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import FileUpload from '../components/FileUpload'
 import Benefits from '../components/Benefits'
@@ -8,10 +8,20 @@ import { processWhatsAppChat } from '../utils/chatProcessor'
 import Link from 'next/link'
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [processingStats, setProcessingStats] = useState<{ processed: number; skipped: number } | null>(null)
   const router = useRouter()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Show nothing until client-side hydration is complete
+  if (!mounted) {
+    return null
+  }
 
   const handleFileUpload = async (file: File) => {
     setIsLoading(true)
@@ -24,34 +34,47 @@ export default function Home() {
       }
       const processedData = await processWhatsAppChat(text)
       
+      // Check if we're in the browser environment
+      if (typeof window === 'undefined') {
+        throw new Error('IndexedDB is not available during server-side rendering')
+      }
+      
       // Store the processed data in IndexedDB
       const dbName = 'WhatsAppAnalyzer'
       const storeName = 'chatData'
       const request = indexedDB.open(dbName, 1)
 
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result
-        db.createObjectStore(storeName)
-      }
-
-      request.onsuccess = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result
-        const transaction = db.transaction(storeName, 'readwrite')
-        const store = transaction.objectStore(storeName)
-        store.put(processedData, 'currentChat')
-
-        transaction.oncomplete = () => {
-          setProcessingStats({
-            processed: processedData.totalMessages,
-            skipped: processedData.systemMessages.length
-          })
-          router.push('/results')
+      // Create a Promise to handle IndexedDB operations
+      await new Promise((resolve, reject) => {
+        request.onupgradeneeded = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result
+          db.createObjectStore(storeName)
         }
-      }
 
-      request.onerror = () => {
-        throw new Error('Failed to store chat data in IndexedDB')
-      }
+        request.onsuccess = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result
+          const transaction = db.transaction(storeName, 'readwrite')
+          const store = transaction.objectStore(storeName)
+          store.put(processedData, 'currentChat')
+
+          transaction.oncomplete = () => {
+            setProcessingStats({
+              processed: processedData.totalMessages,
+              skipped: processedData.systemMessages.length
+            })
+            resolve(true)
+            router.push('/results')
+          }
+
+          transaction.onerror = () => {
+            reject(new Error('Failed to store chat data in IndexedDB'))
+          }
+        }
+
+        request.onerror = () => {
+          reject(new Error('Failed to open IndexedDB'))
+        }
+      })
     } catch (err) {
       console.error('Error processing chat data:', err)
       let errorMessage = 'An error occurred while processing the chat data. '
