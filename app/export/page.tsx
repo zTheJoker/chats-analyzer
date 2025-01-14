@@ -35,6 +35,10 @@ export default function HowToExport() {
             How to Export Your WhatsApp Chat
           </h1>
 
+          <p className="text-lg text-gray-600 mb-8">
+            Follow these simple steps to export your WhatsApp chat for analysis. The process is quick and secure.
+          </p>
+
           <div className="prose prose-lg max-w-none">
             <Tabs defaultValue="iphone" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-8">
@@ -50,17 +54,16 @@ export default function HowToExport() {
                       <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">1</div>
                       <div>
                         <h3 className="font-medium mb-2">Open WhatsApp and select your chat</h3>
-                        <div className="flex items-center gap-2 text-gray-600 mb-3">
-                          <MessageCircle className="w-5 h-5" />
-                          <span>Tap on the chat you want to export</span>
+                        <div className="space-y-3 text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <MessageCircle className="w-5 h-5" />
+                            <span>Open WhatsApp and go to your Chats list</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <ChevronRight className="w-5 h-5" />
+                            <span>Find and tap the individual or group chat you want to analyze</span>
+                          </div>
                         </div>
-                        <Image 
-                          src="/iphone-chat-select.png" 
-                          alt="Select chat on iPhone"
-                          width={300}
-                          height={200}
-                          className="rounded-lg border border-gray-200"
-                        />
                       </div>
                     </li>
 
@@ -68,9 +71,15 @@ export default function HowToExport() {
                       <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">2</div>
                       <div>
                         <h3 className="font-medium mb-2">Access chat settings</h3>
-                        <div className="flex items-center gap-2 text-gray-600 mb-3">
-                          <MoreHorizontal className="w-5 h-5" />
-                          <span>Tap the contact name at the top, then scroll down</span>
+                        <div className="space-y-3 text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <Info className="w-5 h-5" />
+                            <span>Tap the contact or group name at the top of the chat</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <ChevronRight className="w-5 h-5" />
+                            <span>Scroll down to find more options</span>
+                          </div>
                         </div>
                       </div>
                     </li>
@@ -79,9 +88,19 @@ export default function HowToExport() {
                       <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">3</div>
                       <div>
                         <h3 className="font-medium mb-2">Export chat</h3>
-                        <div className="flex items-center gap-2 text-gray-600 mb-3">
-                          <Share2 className="w-5 h-5" />
-                          <span>Select "Export Chat" and choose "Without Media" for faster processing</span>
+                        <div className="space-y-3 text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <Share2 className="w-5 h-5" />
+                            <span>Tap "Export Chat" near the bottom of the settings</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Download className="w-5 h-5" />
+                            <span>Choose "Without Media" when prompted</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-5 h-5" />
+                            <span>Select a method to save or share the exported chat file</span>
+                          </div>
                         </div>
                       </div>
                     </li>
@@ -97,9 +116,15 @@ export default function HowToExport() {
                       <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">1</div>
                       <div>
                         <h3 className="font-medium mb-2">Open your chat in WhatsApp</h3>
-                        <div className="flex items-center gap-2 text-gray-600 mb-3">
-                          <MessageCircle className="w-5 h-5" />
-                          <span>Select the individual or group chat you want to analyze</span>
+                        <div className="space-y-3 text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <MessageCircle className="w-5 h-5" />
+                            <span>Launch WhatsApp and open your Chats list</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <ChevronRight className="w-5 h-5" />
+                            <span>Locate and tap the chat you want to analyze</span>
+                          </div>
                         </div>
                       </div>
                     </li>
@@ -108,9 +133,15 @@ export default function HowToExport() {
                       <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">2</div>
                       <div>
                         <h3 className="font-medium mb-2">Open the menu</h3>
-                        <div className="flex items-center gap-2 text-gray-600 mb-3">
-                          <MoreVertical className="w-5 h-5" />
-                          <span>Tap the three vertical dots in the top-right corner</span>
+                        <div className="space-y-3 text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <MoreVertical className="w-5 h-5" />
+                            <span>Tap the three dots (⋮) in the top-right corner</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Menu className="w-5 h-5" />
+                            <span>This will open the chat options menu</span>
+                          </div>
                         </div>
                       </div>
                     </li>
@@ -119,9 +150,19 @@ export default function HowToExport() {
                       <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">3</div>
                       <div>
                         <h3 className="font-medium mb-2">Export the chat</h3>
-                        <div className="flex items-center gap-2 text-gray-600 mb-3">
-                          <Share2 className="w-5 h-5" />
-                          <span>Select "More" → "Export chat" → "Without media"</span>
+                        <div className="space-y-3 text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <Settings className="w-5 h-5" />
+                            <span>Select "More" from the menu</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Share2 className="w-5 h-5" />
+                            <span>Tap "Export chat"</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Download className="w-5 h-5" />
+                            <span>Choose "Without media" for faster export</span>
+                          </div>
                         </div>
                       </div>
                     </li>
@@ -153,6 +194,19 @@ export default function HowToExport() {
                   </ul>
                 </div>
               </div>
+            </div>
+
+            <div className="bg-green-50 rounded-2xl p-8 mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Smartphone className="w-5 h-5 text-green-600" />
+                <h3 className="text-xl font-semibold text-green-900">Troubleshooting Tips:</h3>
+              </div>
+              <ul className="list-disc list-inside space-y-2 text-green-700">
+                <li>If you don't see the export option, try updating WhatsApp to the latest version</li>
+                <li>For very large chats, the export process might take a few minutes</li>
+                <li>If export fails, try closing and reopening WhatsApp</li>
+                <li>Make sure you have enough storage space on your device</li>
+              </ul>
             </div>
 
             <div className="text-center space-y-4">
