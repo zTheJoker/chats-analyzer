@@ -23,33 +23,50 @@ const LongestMessages: React.FC<LongestMessagesProps> = ({ messages }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h3 className="text-2xl font-semibold mb-4">Top 5 Longest Messages</h3>
-      <ul className="space-y-4">
+      <ul className="space-y-6">
         {messages.map((message, index) => {
           const isExpanded = expandedMessages.includes(index)
           const messageText = message.message
           const shouldTruncate = messageText.length > MESSAGE_PREVIEW_LENGTH && !isExpanded
 
           return (
-            <li key={index} className="border-b pb-2">
-              <div className="flex justify-between items-start">
-                <p className="font-semibold text-sm">
-                  {message.user}
-                  <span className="text-gray-500 ml-2">
+            <li key={index} className="border-b pb-4 last:border-b-0">
+              <div className="flex flex-col space-y-2">
+                {/* Header with user info and timestamp */}
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="font-medium text-sm text-gray-900">
+                    {message.user}
+                  </span>
+                  <span className="text-xs text-gray-500">
                     {message.date} {message.time}
                   </span>
-                </p>
-              </div>
-              <div className="mt-2">
-                <p className="text-sm text-gray-600">
-                  {shouldTruncate 
-                    ? `${messageText.slice(0, MESSAGE_PREVIEW_LENGTH)}...` 
-                    : messageText
-                  }
-                </p>
+                </div>
+
+                {/* Message content */}
+                <div className="relative">
+                  <p className={`text-sm text-gray-600 whitespace-pre-wrap break-words
+                    ${!isExpanded ? 'line-clamp-3' : ''}`}
+                  >
+                    {shouldTruncate 
+                      ? messageText.slice(0, MESSAGE_PREVIEW_LENGTH)
+                      : messageText
+                    }
+                    {shouldTruncate && !isExpanded && (
+                      <span className="text-gray-400">...</span>
+                    )}
+                  </p>
+
+                  {/* Gradient overlay for truncated messages */}
+                  {shouldTruncate && !isExpanded && (
+                    <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent" />
+                  )}
+                </div>
+
+                {/* Show more/less button */}
                 {messageText.length > MESSAGE_PREVIEW_LENGTH && (
                   <button
                     onClick={() => toggleMessage(index)}
-                    className="text-blue-600 text-sm mt-1 flex items-center hover:text-blue-700"
+                    className="text-blue-600 text-sm flex items-center hover:text-blue-700 transition-colors"
                   >
                     {isExpanded ? (
                       <>
