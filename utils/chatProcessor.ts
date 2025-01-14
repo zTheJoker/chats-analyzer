@@ -181,6 +181,22 @@ function isValidWord(word: string): boolean {
   )
 }
 
+function processWords(message: string, user: string) {
+  const words = message
+    .split(/[\s!?.,:;()\[\]{}'"]+/)
+    .filter(word => {
+      const cleanWord = word.toLowerCase().trim()
+      return (
+        cleanWord.length > 2 && 
+        !WHATSAPP_SYSTEM_WORDS.has(cleanWord) &&
+        !/^\d+$/.test(cleanWord) &&
+        !/^[!@#$%^&*(),.?":{}|<>]+$/.test(cleanWord)
+      )
+    })
+
+  return words.length
+}
+
 export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
   let processedLines = 0
   let skippedLines = 0
@@ -406,6 +422,12 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
           totalWordCount++
         }
       })
+
+      if (!isSystemMessage && user && message) {
+        const wordCount = processWords(message, user)
+        userStats[user].wordCount += wordCount
+        totalWordCount += wordCount
+      }
     }
 
     const sortedUsers = Object.entries(userStats).sort((a, b) => b[1].messageCount - a[1].messageCount)

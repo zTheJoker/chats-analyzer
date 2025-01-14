@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ChatData, UserStats } from '../types/chat'
-import { ChevronDown, ChevronUp, MessageCircle, Type, Smile } from 'lucide-react'
+import { ChevronDown, ChevronUp, MessageCircle, Type, Smile, Users } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface UserKeyStats {
@@ -19,30 +19,27 @@ interface KeyStatisticsProps {
 }
 
 const KeyStatistics: React.FC<KeyStatisticsProps> = ({ chatData, emojiStats }) => {
-  // Calculate total words excluding WhatsApp system words
   const totalWords = Object.values(chatData.userStats)
     .reduce((sum, stats) => sum + stats.wordCount, 0)
-
-  // Calculate average messages per day
-  const totalDays = Object.keys(chatData.messageCountByDate).length
-  const avgMessagesPerDay = Math.round(chatData.totalMessages / totalDays)
-
+  
+  const avgWordsPerMessage = Math.round(totalWords / chatData.totalMessages)
+  const userCount = Object.keys(chatData.userStats).length
+  
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
       <h2 className="text-3xl font-semibold mb-6 text-gray-800">Chat Overview</h2>
       
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
           <div className="flex items-center gap-3 mb-2">
-            <MessageCircle className="w-5 h-5 text-blue-600" />
-            <h3 className="text-lg font-medium text-gray-800">Total Messages</h3>
+            <Users className="w-5 h-5 text-blue-600" />
+            <h3 className="text-lg font-medium text-gray-800">Participants</h3>
           </div>
           <p className="text-3xl font-semibold text-blue-700">
-            {chatData.totalMessages.toLocaleString()}
+            {userCount}
           </p>
           <p className="text-sm text-blue-600 mt-1">
-            {avgMessagesPerDay} messages per day
+            Since {chatData.firstMessageDate}
           </p>
         </div>
         
@@ -55,7 +52,7 @@ const KeyStatistics: React.FC<KeyStatisticsProps> = ({ chatData, emojiStats }) =
             {totalWords.toLocaleString()}
           </p>
           <p className="text-sm text-purple-600 mt-1">
-            {Math.round(totalWords / chatData.totalMessages)} words per message
+            ~{avgWordsPerMessage} words per message
           </p>
         </div>
 
@@ -68,7 +65,7 @@ const KeyStatistics: React.FC<KeyStatisticsProps> = ({ chatData, emojiStats }) =
             {emojiStats.slice(0, 5).map(e => e.emoji).join(' ')}
           </p>
           <p className="text-sm text-green-600 mt-1">
-            {emojiStats.reduce((sum, stat) => sum + stat.count, 0).toLocaleString()} total emojis used
+            {emojiStats.reduce((sum, stat) => sum + stat.count, 0).toLocaleString()} total emojis
           </p>
         </div>
       </div>

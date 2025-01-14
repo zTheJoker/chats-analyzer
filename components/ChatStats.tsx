@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 import InactivityPeriods from './InactivityPeriods'
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card'
 import UserStatsCard from './UserStatsCard'
-import { ChevronUp, ChevronDown } from 'lucide-react'
+import { ChevronUp, ChevronDown, Trophy, UserMinus } from 'lucide-react'
 
 interface ChatStatsProps {
   chatData: ChatData
@@ -79,16 +79,29 @@ const ChatStats: React.FC<ChatStatsProps> = ({ chatData }) => {
         </Card>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-2xl font-semibold mb-4">User Activity</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 className="text-lg font-medium mb-2">Most Active User</h4>
-            <p className="text-xl">{chatData.mostActiveUser}</p>
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h3 className="text-2xl font-semibold mb-6">User Activity Rankings</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-6 rounded-xl border border-amber-200">
+            <div className="flex items-center gap-3">
+              <Trophy className="w-6 h-6 text-amber-600" />
+              <h4 className="text-lg font-medium text-gray-800">Most Active User</h4>
+            </div>
+            <p className="text-3xl font-bold text-amber-800 mt-2">{chatData.mostActiveUser}</p>
+            <p className="text-sm text-amber-700 mt-1">
+              {chatData.userStats[chatData.mostActiveUser]?.messageCount.toLocaleString()} messages
+            </p>
           </div>
-          <div>
-            <h4 className="text-lg font-medium mb-2">Least Active User</h4>
-            <p className="text-xl">{chatData.leastActiveUser}</p>
+
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
+            <div className="flex items-center gap-3">
+              <UserMinus className="w-6 h-6 text-gray-600" />
+              <h4 className="text-lg font-medium text-gray-800">Least Active User</h4>
+            </div>
+            <p className="text-3xl font-bold text-gray-800 mt-2">{chatData.leastActiveUser}</p>
+            <p className="text-sm text-gray-700 mt-1">
+              {chatData.userStats[chatData.leastActiveUser]?.messageCount.toLocaleString()} messages
+            </p>
           </div>
         </div>
       </div>

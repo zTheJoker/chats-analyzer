@@ -7,14 +7,18 @@ interface UserStatsCardProps {
   stats: UserStats
   uniqueWords: Set<string>
   totalMessages: number
+  rank: number
 }
 
-const UserStatsCard: React.FC<UserStatsCardProps> = ({ user, stats, uniqueWords, totalMessages }) => {
+const UserStatsCard: React.FC<UserStatsCardProps> = ({ user, stats, uniqueWords, totalMessages, rank }) => {
   const messagePercentage = ((stats.messageCount / totalMessages) * 100).toFixed(1)
   const averageWordsPerMessage = (stats.wordCount / stats.messageCount).toFixed(1)
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="hover:shadow-lg transition-shadow relative">
+      <div className="absolute -top-3 -right-3 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shadow-md">
+        #{rank}
+      </div>
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span className="text-xl">{user}</span>
