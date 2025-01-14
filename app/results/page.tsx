@@ -67,44 +67,46 @@ export default function Results() {
   }
 
   return (
-    <main className="container mx-auto p-4 min-h-screen flex flex-col">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-center">WhatsApp Chat Analysis Results</h1>
-      </div>
+    <main className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-6 md:py-12">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-center">
+            WhatsApp Chat Analysis Results
+          </h1>
+        </div>
 
-      <div id="report-content" className="space-y-8 flex-grow">
-        <KeyStatistics chatData={chatData} emojiStats={chatData.emojiStats} />
-        <ChatStats chatData={chatData} />
-        <WeekdayActivity data={chatData.weekdayActivity} />
-        <MessageLengthDistribution data={chatData.messageLengthDistribution} />
-        <LongestMessages messages={chatData.longestMessages} />
-        <EmojiStats emojiStats={chatData.emojiStats} userEmojiStats={chatData.userEmojiStats} />
-        <LinkStats linkStats={chatData.linkStats} />
-        <ConversationStarters data={chatData.conversationStarters} />
-        <InactivityPeriods biggestTimeStop={chatData.biggestTimeStop} />
-        <LongestConversations conversations={chatData.longestConversations} />
-        <MostRepliedMessages messages={chatData.mostRepliedMessages} />
-      </div>
+        <div id="report-content" className="space-y-6 md:space-y-8">
+          <KeyStatistics chatData={chatData} emojiStats={chatData.emojiStats} />
+          <ChatStats chatData={chatData} />
+          <WeekdayActivity data={chatData.weekdayActivity} />
+          <MessageLengthDistribution data={chatData.messageLengthDistribution} />
+          <LongestMessages messages={chatData.longestMessages} />
+          <EmojiStats emojiStats={chatData.emojiStats} userEmojiStats={chatData.userEmojiStats} />
+          <LinkStats linkStats={chatData.linkStats} />
+          <ConversationStarters data={chatData.conversationStarters} />
+          <InactivityPeriods biggestTimeStop={chatData.biggestTimeStop} />
+          <LongestConversations conversations={chatData.longestConversations} />
+          <MostRepliedMessages messages={chatData.mostRepliedMessages} />
+        </div>
 
-      {/* Bottom section with download button and footer */}
-      <div className="mt-12 border-t border-gray-200 pt-6">
-        <div className="flex flex-col items-center gap-6">
-          <DownloadPDF />
-          
-          <Alert className="bg-gray-50 border-gray-200">
-            <Info className="h-4 w-4 text-gray-500" />
-            <AlertDescription className="text-sm text-gray-500">
-              All processing is done locally in your browser - your data never leaves your device.
-            </AlertDescription>
-          </Alert>
+        <div className="mt-8 md:mt-12 border-t border-gray-200 pt-6">
+          <div className="flex flex-col items-center gap-4 md:gap-6 max-w-md mx-auto">
+            <DownloadPDF />
+            
+            <Alert className="bg-gray-50 border-gray-200">
+              <Info className="h-4 w-4 text-gray-500" />
+              <AlertDescription className="text-sm text-gray-500">
+                All processing is done locally in your browser - your data never leaves your device.
+              </AlertDescription>
+            </Alert>
 
-          {/* Subtle footer */}
-          <div className="w-full text-center text-sm text-gray-400">
-            <a href="/terms" className="hover:text-gray-600">Terms</a>
-            {' · '}
-            <a href="/privacy" className="hover:text-gray-600">Privacy</a>
-            {' · '}
-            <a href="mailto:support@convoanalyzer.com" className="hover:text-gray-600">Support</a>
+            <div className="w-full text-center text-sm text-gray-400 py-4">
+              <a href="/terms" className="hover:text-gray-600">Terms</a>
+              {' · '}
+              <a href="/privacy" className="hover:text-gray-600">Privacy</a>
+              {' · '}
+              <a href="mailto:support@convoanalyzer.com" className="hover:text-gray-600">Support</a>
+            </div>
           </div>
         </div>
       </div>
