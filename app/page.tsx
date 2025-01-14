@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import FileUpload from '../components/FileUpload'
 import Benefits from '../components/Benefits'
 import { processWhatsAppChat } from '../utils/chatProcessor'
+import Link from 'next/link'
 
 export default function Home() {
   const [error, setError] = useState<string | null>(null)
@@ -85,6 +86,16 @@ export default function Home() {
               Export your WhatsApp chat and upload the .txt file here. All processing happens in your browser - your data stays with you.
             </p>
             <FileUpload onFileUpload={handleFileUpload} isLoading={isLoading} />
+            
+            <div className="mt-4 text-center text-sm text-gray-500">
+              <p>
+                Need help exporting your chat?{' '}
+                <Link href="/export" className="text-blue-600 hover:text-blue-700 hover:underline">
+                  View step-by-step guide
+                </Link>
+              </p>
+            </div>
+
             {error && (
               <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
                 <p className="font-bold">Error:</p>
