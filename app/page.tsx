@@ -96,23 +96,21 @@ export default function Home() {
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-6xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+          <h1 className="text-6xl md:text-6xl text-4xl font-bold mb-4 md:mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
             WhatsApp Chat Analyzer
           </h1>
-          <p className="text-2xl text-center text-gray-600 mb-12">
+          <p className="text-xl md:text-2xl text-center text-gray-600 mb-8 md:mb-12">
             Unlock insights from your conversations with our powerful, private, and secure analyzer.
           </p>
           
-          <Benefits />
-
-          <div className="bg-white p-8 rounded-3xl shadow-2xl mt-16">
-            <h2 className="text-3xl font-semibold mb-6">Analyze Your Chat</h2>
-            <p className="text-lg text-gray-600 mb-6">
+          <div className="bg-white p-6 md:p-8 rounded-3xl shadow-2xl mb-12 md:mt-16">
+            <h2 className="text-2xl md:text-3xl font-semibold mb-4 md:mb-6">Analyze Your Chat</h2>
+            <p className="text-base md:text-lg text-gray-600 mb-4 md:mb-6">
               Export your WhatsApp chat and upload the .txt file here. All processing happens in your browser - your data stays with you.
             </p>
             <FileUpload onFileUpload={handleFileUpload} isLoading={isLoading} />
             
-            <div className="mt-4 text-center text-sm text-gray-500">
+            <div className="mt-3 md:mt-4 text-center text-xs md:text-sm text-gray-500">
               <p>
                 Need help exporting your chat?{' '}
                 <Link href="/export" className="text-blue-600 hover:text-blue-700 hover:underline">
@@ -139,6 +137,8 @@ export default function Home() {
               </div>
             )}
           </div>
+
+          <Benefits />
 
           <div className="mt-16 text-center">
             <h3 className="text-2xl font-semibold mb-4">How It Works</h3>
