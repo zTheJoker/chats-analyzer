@@ -94,14 +94,14 @@ export interface ChatData {
 }
 
 const MESSAGE_PATTERNS = [
-  // Standard format: [date], [time] - [user]: [message]
-  /^(\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}),?\s*(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*([^:]+):\s*(.+)$/,
+  // Standard format with RTL support: [date], [time] - [user]: [message]
+  /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*[-–]\s*(.*?):\s*(.+)$/,
   
-  // Alternative format: [date] [time] [user]: [message]
-  /^(\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4})\s*(\d{1,2}:\d{2}(?::\d{2})?)\s+([^:]+):\s*(.+)$/,
+  // Alternative format with optional brackets: [date] [time] [user]: [message]
+  /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*(.*?):\s*(.+)$/,
   
   // System message format: [date], [time] - [message]
-  /^(\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}),?\s*(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*(.+)$/
+  /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*[-–]?\s*(.+)$/
 ];
 
 function parseDate(dateString: string): Date | null {
@@ -145,10 +145,19 @@ function parseDate(dateString: string): Date | null {
   return parsedDate;
 }
 
+function cleanWhatsAppFormatting(text: string): string {
+  return text
+    .replace(/[\u200E\u200F\u202A-\u202E]/g, '') // Remove RTL/LTR markers
+    .replace(/^\[|\]$/g, '')                      // Remove brackets
+    .trim();
+}
+
 function cleanupText(text: string): string {
-  // Remove Unicode control characters while preserving RTL markers
-  return text.replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-            .replace(/[\u200B-\u200F\u202A-\u202E]/g, '');
+  // Remove control characters but preserve RTL text
+  return text
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+    .replace(/\u200B/g, '') // Zero-width space
+    .trim();
 }
 
 export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
@@ -206,24 +215,35 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
           if (match.length === 5) {
             // Regular message
             [, date, time, user, message] = match
+            date = cleanWhatsAppFormatting(date)
+            time = cleanWhatsAppFormatting(time)
+            user = cleanWhatsAppFormatting(user)
+            message = cleanWhatsAppFormatting(message)
           } else if (match.length === 4) {
             // System message
             [, date, time, message] = match
+            date = cleanWhatsAppFormatting(date)
+            time = cleanWhatsAppFormatting(time)
+            message = cleanWhatsAppFormatting(message)
             isSystemMessage = true
           }
           break
         }
       }
 
-      if (!match) {
-        // If no pattern matches, treat as system message
-        systemMessages.push(line)
-        skippedLines++
-        continue
+      // Special handling for system messages and media
+      if (message) {
+        const mediaPattern = /<?(Media|image|video|audio|sticker) omitted>?/i
+        const deletedPattern = /(?:This message was deleted|You deleted this message)/i
+        
+        if (mediaPattern.test(message) || deletedPattern.test(message)) {
+          isSystemMessage = true
+        }
       }
 
-      if (!date || !time) {
-        console.warn(`Skipping invalid line ${i + 1}: Missing date or time`)
+      if (!match || (!date && !time)) {
+        // If no pattern matches or missing date/time, treat as system message
+        systemMessages.push(cleanupText(line))
         skippedLines++
         continue
       }
@@ -319,6 +339,18 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       messages.push({ date: normalizedDate, time, user, message })
 
       processedLines++
+
+      // Add debug logging
+      console.log('Processing line:', {
+        original: line,
+        match: match ? {
+          date,
+          time,
+          user,
+          message,
+          isSystemMessage
+        } : null
+      });
     }
 
     const sortedUsers = Object.entries(userStats).sort((a, b) => b[1].messageCount - a[1].messageCount)
