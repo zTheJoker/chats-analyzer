@@ -122,9 +122,40 @@ export default function Home() {
             </ol>
           </div>
 
-          <p className="text-sm text-center text-gray-500 mt-16">
-            By using this service, you agree to our Terms of Service and Privacy Policy.
-          </p>
+          <footer className="mt-16 py-8 bg-gray-50 border-t border-gray-200">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <h4 className="text-lg font-semibold mb-4">Privacy First</h4>
+                    <p className="text-gray-600 mb-4">
+                      All processing is done locally in your browser. Your chat data never leaves your device.
+                    </p>
+                    <p className="text-gray-600">
+                      For any questions, reach out to{' '}
+                      <a href="mailto:support@convoanalyzer.com" className="text-blue-600 hover:underline">
+                        support@convoanalyzer.com
+                      </a>
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold mb-4">Legal</h4>
+                    <p className="text-gray-600">
+                      By using this service, you agree to our{' '}
+                      <a href="/terms" className="text-blue-600 hover:underline">
+                        Terms of Service
+                      </a>{' '}
+                      and{' '}
+                      <a href="/privacy" className="text-blue-600 hover:underline">
+                        Privacy Policy
+                      </a>
+                      .
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </footer>
         </div>
       </div>
     </main>
