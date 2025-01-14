@@ -44,6 +44,21 @@ const DownloadPDF: React.FC = () => {
         .recharts-legend-item {
           margin: 0 10px !important;
         }
+        /* Adjust card and chart container styles for PDF */
+        .card, .chart-container, .stats-container {
+          margin-bottom: 20px !important;
+          page-break-inside: auto !important;
+          break-inside: auto !important;
+        }
+        /* Ensure charts maintain reasonable height */
+        .recharts-wrapper {
+          height: 300px !important;
+          margin-bottom: 15px !important;
+        }
+        /* Add some spacing between sections */
+        #report-content > div {
+          margin-bottom: 30px !important;
+        }
       `
       document.head.appendChild(style)
 
@@ -63,13 +78,6 @@ const DownloadPDF: React.FC = () => {
       `
       element.appendChild(footer)
 
-      // Existing component styles
-      const components = element.querySelectorAll('.card, .chart-container, .stats-container')
-      components.forEach(comp => {
-        (comp as HTMLElement).style.pageBreakInside = 'avoid'
-        ;(comp as HTMLElement).style.breakInside = 'avoid'
-      })
-
       const opt = {
         margin: isMobile ? 8 : 10,
         filename: 'whatsapp-chat-analysis.pdf',
@@ -81,11 +89,12 @@ const DownloadPDF: React.FC = () => {
           scrollY: -window.scrollY,
           windowWidth: 1200, // Force consistent width for better rendering
           onclone: (clonedDoc: Document) => {
-            // Ensure charts are fully rendered in the clone
+            // Ensure charts are properly sized in the clone
             const charts = clonedDoc.querySelectorAll('.recharts-wrapper')
             charts.forEach(chart => {
               (chart as HTMLElement).style.width = '100%'
               ;(chart as HTMLElement).style.minWidth = '500px'
+              ;(chart as HTMLElement).style.maxHeight = '300px'
             })
           }
         },
@@ -95,7 +104,8 @@ const DownloadPDF: React.FC = () => {
           orientation: 'portrait',
           compress: true
         },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        // Remove forced page breaks and let content flow naturally
+        pagebreak: { mode: 'css' }
       }
 
       // Temporarily hide any expanded content
@@ -108,10 +118,6 @@ const DownloadPDF: React.FC = () => {
       document.head.removeChild(style)
       element.removeChild(footer)
       expandedElements.forEach(el => (el as HTMLElement).style.display = '')
-      components.forEach(comp => {
-        (comp as HTMLElement).style.pageBreakInside = ''
-        ;(comp as HTMLElement).style.breakInside = ''
-      })
 
       toast({
         title: "Success!",
