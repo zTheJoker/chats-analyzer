@@ -308,12 +308,21 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       const hour = parseInt(time.split(':')[0], 10)
       messagesByHour[hour]++
 
-      const words = message.split(/\s+/)
-      words.forEach((word) => {
+      // Process words for both frequency and uniqueness
+      const messageWords = message.split(/\s+/)
+      messageWords.forEach((word) => {
         const cleanWord = word.toLowerCase().replace(/[^\w\s]/g, '')
         if (cleanWord && !WHATSAPP_SYSTEM_WORDS.has(cleanWord) && (isNaN(Number(cleanWord)) || isNonLatinChar(cleanWord[0]))) {
+          // Update word frequency
           wordFrequency[cleanWord] = (wordFrequency[cleanWord] || 0) + 1
           userStats[user].wordCount++
+          
+          // Update unique words for user
+          if (!uniqueWordsPerUser[user]) {
+            uniqueWordsPerUser[user] = new Set()
+          }
+          uniqueWordsPerUser[user].add(cleanWord)
+          totalWordCount++
         }
       })
 
