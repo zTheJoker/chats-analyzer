@@ -13,6 +13,7 @@ import InactivityPeriods from '../../components/InactivityPeriods'
 import LongestConversations from '../../components/LongestConversations'
 import MostRepliedMessages from '../../components/MostRepliedMessages'
 import { ChatData } from '../../types/chat'
+import KeyStatistics from '../../components/KeyStatistics'
 
 export default function Results() {
   const [chatData, setChatData] = useState<ChatData | null>(null)
@@ -56,6 +57,7 @@ export default function Results() {
     <main className="container mx-auto p-4">
       <h1 className="text-4xl font-bold mb-8 text-center">WhatsApp Chat Analysis Results</h1>
       <div className="space-y-8 mt-8">
+        <KeyStatistics chatData={chatData} emojiStats={chatData.emojiStats} />
         <ChatStats chatData={chatData} />
         <WeekdayActivity data={chatData.weekdayActivity} />
         <MessageLengthDistribution data={chatData.messageLengthDistribution} />
