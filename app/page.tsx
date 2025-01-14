@@ -18,11 +18,6 @@ export default function Home() {
     setMounted(true)
   }, [])
 
-  // Show nothing until client-side hydration is complete
-  if (!mounted) {
-    return null
-  }
-
   const handleFileUpload = async (file: File) => {
     setIsLoading(true)
     setError(null)
@@ -34,47 +29,51 @@ export default function Home() {
       }
       const processedData = await processWhatsAppChat(text)
       
-      // Check if we're in the browser environment
-      if (typeof window === 'undefined') {
-        throw new Error('IndexedDB is not available during server-side rendering')
+      // Only run IndexedDB code on the client
+      if (typeof window !== 'undefined') {
+        const dbName = 'WhatsAppAnalyzer'
+        const storeName = 'chatData'
+        
+        try {
+          await new Promise((resolve, reject) => {
+            const request = indexedDB.open(dbName, 1)
+            
+            request.onupgradeneeded = (event) => {
+              const db = (event.target as IDBOpenDBRequest).result
+              if (!db.objectStoreNames.contains(storeName)) {
+                db.createObjectStore(storeName)
+              }
+            }
+
+            request.onsuccess = (event) => {
+              const db = (event.target as IDBOpenDBRequest).result
+              const transaction = db.transaction(storeName, 'readwrite')
+              const store = transaction.objectStore(storeName)
+              store.put(processedData, 'currentChat')
+
+              transaction.oncomplete = () => {
+                setProcessingStats({
+                  processed: processedData.totalMessages,
+                  skipped: processedData.systemMessages.length
+                })
+                resolve(true)
+                router.push('/results')
+              }
+
+              transaction.onerror = () => {
+                reject(new Error('Failed to store chat data in IndexedDB'))
+              }
+            }
+
+            request.onerror = () => {
+              reject(new Error('Failed to open IndexedDB'))
+            }
+          })
+        } catch (dbError) {
+          console.error('IndexedDB error:', dbError)
+          throw new Error('Failed to store data: ' + (dbError instanceof Error ? dbError.message : 'Unknown error'))
+        }
       }
-      
-      // Store the processed data in IndexedDB
-      const dbName = 'WhatsAppAnalyzer'
-      const storeName = 'chatData'
-      const request = indexedDB.open(dbName, 1)
-
-      // Create a Promise to handle IndexedDB operations
-      await new Promise((resolve, reject) => {
-        request.onupgradeneeded = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result
-          db.createObjectStore(storeName)
-        }
-
-        request.onsuccess = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result
-          const transaction = db.transaction(storeName, 'readwrite')
-          const store = transaction.objectStore(storeName)
-          store.put(processedData, 'currentChat')
-
-          transaction.oncomplete = () => {
-            setProcessingStats({
-              processed: processedData.totalMessages,
-              skipped: processedData.systemMessages.length
-            })
-            resolve(true)
-            router.push('/results')
-          }
-
-          transaction.onerror = () => {
-            reject(new Error('Failed to store chat data in IndexedDB'))
-          }
-        }
-
-        request.onerror = () => {
-          reject(new Error('Failed to open IndexedDB'))
-        }
-      })
     } catch (err) {
       console.error('Error processing chat data:', err)
       let errorMessage = 'An error occurred while processing the chat data. '
@@ -90,6 +89,12 @@ export default function Home() {
     }
   }
 
+  // Return null on server-side and during initial hydration
+  if (!mounted) {
+    return null
+  }
+
+  // Only render the actual content after hydration is complete
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16">
