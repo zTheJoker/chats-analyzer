@@ -4,8 +4,16 @@ import emojiRegex from 'emoji-regex'
 
 const WHATSAPP_SYSTEM_WORDS = new Set([
   'created', 'changed', 'left', 'added', 'removed', 'joined', 'using', 'link', 'deleted', 'omitted',
-  'this', 'message', 'was', 'edited', 'poll', 'the', 'group', 'admin', 'you', 'to',
-  // Add more WhatsApp system words as needed
+  'this', 'message', 'was', 'edited', 'poll', 'the', 'group', 'admin', 'you', 'to', 'and',
+  'image', 'video', 'audio', 'sticker', 'gif', 'document', 'contact', 'location', 'live',
+  'missed', 'call', 'voice', 'ended', 'started', 'changed', 'security', 'code', 'invite',
+  'link', 'description', 'subject', 'icon', 'participants', 'now', 'admin',
+  
+  // Common words to filter in multiple languages
+  'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
+  'el', 'la', 'los', 'las', 'un', 'una', 'y', 'o', 'pero', 'en', 'sobre', 'para', 'de', 'con',
+  'le', 'la', 'les', 'et', 'ou', 'mais', 'sur', 'pour', 'de', 'avec',
+  'der', 'die', 'das', 'und', 'oder', 'aber', 'in', 'auf', 'für', 'von', 'mit'
 ])
 
 function isNonLatinChar(char: string): boolean {
@@ -163,6 +171,16 @@ function cleanupText(text: string): string {
     .trim();
 }
 
+function isValidWord(word: string): boolean {
+  const cleanWord = word.toLowerCase().trim()
+  return (
+    cleanWord.length > 2 && // Minimum length
+    !WHATSAPP_SYSTEM_WORDS.has(cleanWord) && // Not a system/common word
+    !/^\d+$/.test(cleanWord) && // Not just numbers
+    !/^[!@#$%^&*(),.?":{}|<>]+$/.test(cleanWord) // Not just punctuation
+  )
+}
+
 export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
   let processedLines = 0
   let skippedLines = 0
@@ -309,7 +327,9 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       messagesByHour[hour]++
 
       // Process words for both frequency and uniqueness
-      const messageWords = message.split(/\s+/)
+      const messageWords = message
+        .split(/[\s!?.,:;()\[\]{}'"]+/) // Split on more punctuation
+        .filter(isValidWord)
       messageWords.forEach((word) => {
         const cleanWord = word.toLowerCase().replace(/[^\w\s]/g, '')
         if (cleanWord && !WHATSAPP_SYSTEM_WORDS.has(cleanWord) && (isNaN(Number(cleanWord)) || isNonLatinChar(cleanWord[0]))) {

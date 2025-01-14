@@ -74,5 +74,14 @@ export interface ChatData {
     };
     replies: number;
   }>;
+  wordStats: {
+    totalWords: number;
+    averageWordsPerMessage: number;
+    uniqueWords: number;
+    mostCommonWords: Array<{
+      word: string;
+      count: number;
+    }>;
+  };
 }
 
