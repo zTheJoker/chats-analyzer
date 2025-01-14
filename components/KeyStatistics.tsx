@@ -19,11 +19,9 @@ interface KeyStatisticsProps {
 }
 
 const KeyStatistics: React.FC<KeyStatisticsProps> = ({ chatData, emojiStats }) => {
-  const totalWords = Object.values(chatData.userStats)
-    .reduce((sum, stats) => sum + stats.wordCount, 0)
-  
-  const avgWordsPerMessage = Math.round(totalWords / chatData.totalMessages)
   const userCount = Object.keys(chatData.userStats).length
+  const totalMessages = chatData.totalMessages
+  const avgMessagesPerDay = chatData.averageMessagesPerDay.toFixed(1)
   
   const formattedDate = new Date(chatData.firstMessageDate).toLocaleDateString('en-US', {
     month: 'long',
@@ -50,14 +48,14 @@ const KeyStatistics: React.FC<KeyStatisticsProps> = ({ chatData, emojiStats }) =
         
         <div className="bg-purple-50 rounded-xl p-6 border border-purple-100">
           <div className="flex items-center gap-3 mb-2">
-            <Type className="w-5 h-5 text-purple-600" />
-            <h3 className="text-lg font-medium text-gray-800">Total Words Sent</h3>
+            <MessageCircle className="w-5 h-5 text-purple-600" />
+            <h3 className="text-lg font-medium text-gray-800">Total Messages</h3>
           </div>
           <p className="text-3xl font-semibold text-purple-700">
-            {totalWords.toLocaleString()}
+            {totalMessages.toLocaleString()}
           </p>
           <p className="text-sm text-purple-600 mt-1">
-            Average {avgWordsPerMessage} words per message
+            {avgMessagesPerDay} messages per day
           </p>
         </div>
 
