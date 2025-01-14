@@ -38,43 +38,43 @@ const ChatStats: React.FC<ChatStatsProps> = ({ chatData }) => {
       <h2 className="text-3xl font-bold mb-6">Chat Statistics</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
           <CardHeader>
-            <CardTitle>Total Messages</CardTitle>
+            <CardTitle className="text-blue-800">Total Messages</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{chatData.totalMessages.toLocaleString()}</p>
-            <p className="text-sm text-gray-500">Since {chatData.firstMessageDate}</p>
+            <p className="text-3xl font-bold text-blue-900">{chatData.totalMessages.toLocaleString()}</p>
+            <p className="text-sm text-blue-700">Since {chatData.firstMessageDate}</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
           <CardHeader>
-            <CardTitle>Total Words</CardTitle>
+            <CardTitle className="text-purple-800">Total Words</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{chatData.totalWordCount.toLocaleString()}</p>
-            <p className="text-sm text-gray-500">Across all messages</p>
+            <p className="text-3xl font-bold text-purple-900">{chatData.totalWordCount.toLocaleString()}</p>
+            <p className="text-sm text-purple-700">Across all messages</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
           <CardHeader>
-            <CardTitle>Daily Average</CardTitle>
+            <CardTitle className="text-green-800">Daily Average</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{chatData.averageMessagesPerDay.toFixed(1)}</p>
-            <p className="text-sm text-gray-500">Messages per day</p>
+            <p className="text-3xl font-bold text-green-900">{chatData.averageMessagesPerDay.toFixed(1)}</p>
+            <p className="text-sm text-green-700">Messages per day</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
           <CardHeader>
-            <CardTitle>Active Users</CardTitle>
+            <CardTitle className="text-amber-800">Active Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{Object.keys(chatData.userStats).length}</p>
-            <p className="text-sm text-gray-500">Participants</p>
+            <p className="text-3xl font-bold text-amber-900">{Object.keys(chatData.userStats).length}</p>
+            <p className="text-sm text-amber-700">Participants</p>
           </CardContent>
         </Card>
       </div>
