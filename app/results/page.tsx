@@ -1,50 +1,60 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import ChatStats from '../../components/ChatStats'
-import WeekdayActivity from '../../components/WeekdayActivity'
-import MessageLengthDistribution from '../../components/MessageLengthDistribution'
-import LongestMessages from '../../components/LongestMessages'
-import EmojiStats from '../../components/EmojiStats'
-import LinkStats from '../../components/LinkStats'
-import ConversationStarters from '../../components/ConversationStarters'
-import InactivityPeriods from '../../components/InactivityPeriods'
-import LongestConversations from '../../components/LongestConversations'
-import MostRepliedMessages from '../../components/MostRepliedMessages'
-import { ChatData } from '../../types/chat'
-import KeyStatistics from '../../components/KeyStatistics'
-import DownloadPDF from '../../components/DownloadPDF'
+import { ChatData } from '@/types/chat'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Info } from 'lucide-react'
+
+// Dynamically import components with ssr disabled
+const ChatStats = dynamic(() => import('@/components/ChatStats'), { ssr: false })
+const WeekdayActivity = dynamic(() => import('@/components/WeekdayActivity'), { ssr: false })
+const MessageLengthDistribution = dynamic(() => import('@/components/MessageLengthDistribution'), { ssr: false })
+const LongestMessages = dynamic(() => import('@/components/LongestMessages'), { ssr: false })
+const EmojiStats = dynamic(() => import('@/components/EmojiStats'), { ssr: false })
+const LinkStats = dynamic(() => import('@/components/LinkStats'), { ssr: false })
+const ConversationStarters = dynamic(() => import('@/components/ConversationStarters'), { ssr: false })
+const InactivityPeriods = dynamic(() => import('@/components/InactivityPeriods'), { ssr: false })
+const LongestConversations = dynamic(() => import('@/components/LongestConversations'), { ssr: false })
+const MostRepliedMessages = dynamic(() => import('@/components/MostRepliedMessages'), { ssr: false })
+const KeyStatistics = dynamic(() => import('@/components/KeyStatistics'), { ssr: false })
+const DownloadPDF = dynamic(() => import('@/components/DownloadPDF'), { ssr: false })
 
 export default function Results() {
   const [chatData, setChatData] = useState<ChatData | null>(null)
   const router = useRouter()
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const fetchData = async () => {
-      const dbName = 'WhatsAppAnalyzer'
-      const storeName = 'chatData'
-      const request = indexedDB.open(dbName, 1)
+      try {
+        const dbName = 'WhatsAppAnalyzer'
+        const storeName = 'chatData'
+        const request = indexedDB.open(dbName, 1)
 
-      request.onsuccess = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result
-        const transaction = db.transaction(storeName, 'readonly')
-        const store = transaction.objectStore(storeName)
-        const getRequest = store.get('currentChat')
+        request.onsuccess = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result
+          const transaction = db.transaction(storeName, 'readonly')
+          const store = transaction.objectStore(storeName)
+          const getRequest = store.get('currentChat')
 
-        getRequest.onsuccess = () => {
-          if (getRequest.result) {
-            setChatData(getRequest.result)
-          } else {
-            router.push('/')
+          getRequest.onsuccess = () => {
+            if (getRequest.result) {
+              setChatData(getRequest.result)
+            } else {
+              router.push('/')
+            }
           }
         }
-      }
 
-      request.onerror = () => {
-        console.error('Error opening IndexedDB')
+        request.onerror = () => {
+          console.error('Error opening IndexedDB')
+          router.push('/')
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error)
         router.push('/')
       }
     }
