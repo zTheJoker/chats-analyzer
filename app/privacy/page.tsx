@@ -1,3 +1,7 @@
+export const metadata = {
+  title: 'Privacy Policy',
+}
+
 export default function Privacy() {
   return (
     <main className="min-h-screen bg-white py-12">

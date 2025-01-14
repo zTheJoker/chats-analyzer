@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://convoanalyzer.com/sitemap.xml 
