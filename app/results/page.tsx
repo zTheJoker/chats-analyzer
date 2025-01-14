@@ -21,10 +21,6 @@ const MostRepliedMessages = dynamic(() => import('@/components/MostRepliedMessag
 const KeyStatistics = dynamic(() => import('@/components/KeyStatistics'), { ssr: false })
 const DownloadPDF = dynamic(() => import('@/components/DownloadPDF'), { ssr: false })
 
-export const metadata = {
-  title: 'Analysis Results',
-}
-
 export default function Results() {
   const [chatData, setChatData] = useState<ChatData | null>(null)
   const router = useRouter()

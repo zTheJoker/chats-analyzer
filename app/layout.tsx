@@ -13,18 +13,25 @@ export const metadata: Metadata = {
   creator: 'ConvoAnalyzer',
   publisher: 'ConvoAnalyzer',
   robots: 'index, follow',
+  icons: {
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: 'https://convoanalyzer.com',
     title: 'WhatsApp Chat Analyzer',
     description: 'Analyze your WhatsApp chats with our powerful, private, and secure analyzer',
-    siteName: 'WhatsApp Chat Analyzer'
+    siteName: 'WhatsApp Chat Analyzer',
+    images: ['/logo.svg'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'WhatsApp Chat Analyzer',
     description: 'Analyze your WhatsApp chats with our powerful, private, and secure analyzer',
+    images: ['/logo.svg'],
   }
 }
 
