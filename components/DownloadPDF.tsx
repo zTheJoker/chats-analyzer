@@ -24,7 +24,46 @@ const DownloadPDF: React.FC = () => {
       const element = document.getElementById('report-content')
       if (!element) throw new Error('Report content not found')
 
-      // Add page-break-inside: avoid to major components
+      // Add temporary styles for PDF generation
+      const style = document.createElement('style')
+      style.textContent = `
+        .recharts-legend-wrapper {
+          position: relative !important;
+          width: 100% !important;
+          left: 0 !important;
+          margin: 10px auto !important;
+          text-align: center !important;
+        }
+        .recharts-default-legend {
+          justify-content: center !important;
+          display: flex !important;
+          flex-wrap: wrap !important;
+          width: 100% !important;
+          margin: 0 auto !important;
+        }
+        .recharts-legend-item {
+          margin: 0 10px !important;
+        }
+      `
+      document.head.appendChild(style)
+
+      // Add footer
+      const footer = document.createElement('div')
+      footer.innerHTML = `
+        <div style="
+          text-align: center;
+          padding: 20px;
+          margin-top: 30px;
+          border-top: 1px solid #eaeaea;
+          color: #666;
+          font-size: 14px;
+        ">
+          Created with ConvoAnalyzer - Try it out at ConvoAnalyzer.com
+        </div>
+      `
+      element.appendChild(footer)
+
+      // Existing component styles
       const components = element.querySelectorAll('.card, .chart-container, .stats-container')
       components.forEach(comp => {
         (comp as HTMLElement).style.pageBreakInside = 'avoid'
@@ -39,7 +78,16 @@ const DownloadPDF: React.FC = () => {
           scale: isMobile ? 1.5 : 2,
           useCORS: true,
           logging: false,
-          scrollY: -window.scrollY
+          scrollY: -window.scrollY,
+          windowWidth: 1200, // Force consistent width for better rendering
+          onclone: (clonedDoc: Document) => {
+            // Ensure charts are fully rendered in the clone
+            const charts = clonedDoc.querySelectorAll('.recharts-wrapper')
+            charts.forEach(chart => {
+              (chart as HTMLElement).style.width = '100%'
+              ;(chart as HTMLElement).style.minWidth = '500px'
+            })
+          }
         },
         jsPDF: { 
           unit: 'mm', 
@@ -56,10 +104,10 @@ const DownloadPDF: React.FC = () => {
 
       await html2pdf().set(opt).from(element).save()
       
-      // Restore expanded content visibility
+      // Cleanup
+      document.head.removeChild(style)
+      element.removeChild(footer)
       expandedElements.forEach(el => (el as HTMLElement).style.display = '')
-
-      // Reset the styles after PDF generation
       components.forEach(comp => {
         (comp as HTMLElement).style.pageBreakInside = ''
         ;(comp as HTMLElement).style.breakInside = ''
