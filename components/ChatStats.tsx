@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { ChatData } from '../types/chat'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts'
 import InactivityPeriods from './InactivityPeriods'
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card'
+import UserStatsCard from './UserStatsCard'
 
 interface ChatStatsProps {
   chatData: ChatData
@@ -33,19 +35,46 @@ const ChatStats: React.FC<ChatStatsProps> = ({ chatData }) => {
     <div className="space-y-8">
       <h2 className="text-3xl font-bold mb-6">Chat Statistics</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-blue-100 p-4 rounded-md">
-          <h4 className="text-lg font-medium mb-2">Total Messages</h4>
-          <p className="text-3xl font-bold">{chatData.totalMessages.toLocaleString()}</p>
-        </div>
-        <div className="bg-green-100 p-4 rounded-md">
-          <h4 className="text-lg font-medium mb-2">Total Users</h4>
-          <p className="text-3xl font-bold">{Object.keys(chatData.userStats).length}</p>
-        </div>
-        <div className="bg-yellow-100 p-4 rounded-md">
-          <h4 className="text-lg font-medium mb-2">Avg Messages/Day</h4>
-          <p className="text-3xl font-bold">{chatData.averageMessagesPerDay.toFixed(2)}</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Messages</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{chatData.totalMessages.toLocaleString()}</p>
+            <p className="text-sm text-gray-500">Since {chatData.firstMessageDate}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Words</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{chatData.totalWordCount.toLocaleString()}</p>
+            <p className="text-sm text-gray-500">Across all messages</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Daily Average</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{chatData.averageMessagesPerDay.toFixed(1)}</p>
+            <p className="text-sm text-gray-500">Messages per day</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Users</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{Object.keys(chatData.userStats).length}</p>
+            <p className="text-sm text-gray-500">Participants</p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-md">
@@ -138,29 +167,18 @@ const ChatStats: React.FC<ChatStatsProps> = ({ chatData }) => {
         </ResponsiveContainer>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div>
         <h3 className="text-2xl font-semibold mb-4">User Statistics</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="px-4 py-2">User</th>
-                <th className="px-4 py-2">Total Messages</th>
-                <th className="px-4 py-2">Word Count</th>
-                <th className="px-4 py-2">Avg Words/Message</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(chatData.userStats).map(([user, stats]) => (
-                <tr key={user} className="border-b">
-                  <td className="px-4 py-2">{user}</td>
-                  <td className="px-4 py-2">{stats.messageCount}</td>
-                  <td className="px-4 py-2">{stats.wordCount}</td>
-                  <td className="px-4 py-2">{(stats.wordCount / stats.messageCount).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(chatData.userStats).map(([user, stats]) => (
+            <UserStatsCard
+              key={user}
+              user={user}
+              stats={stats}
+              uniqueWords={chatData.uniqueWordsPerUser[user]}
+              totalMessages={chatData.totalMessages}
+            />
+          ))}
         </div>
       </div>
       <InactivityPeriods biggestTimeStop={chatData.biggestTimeStop} />

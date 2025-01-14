@@ -91,6 +91,9 @@ export interface ChatData {
   longestConversations: MessageData[][]
   mostRepliedMessages: { message: MessageData; replyCount: number }[]
   systemMessages: string[]
+  firstMessageDate: string
+  totalWordCount: number
+  uniqueWordsPerUser: Record<string, Set<string>>
 }
 
 const MESSAGE_PATTERNS = [
@@ -195,6 +198,10 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
   let lastMessageTime = ''
 
   const systemMessages: string[] = []
+
+  const uniqueWordsPerUser: Record<string, Set<string>> = {}
+  let firstMessageDate = ''
+  let totalWordCount = 0
 
   try {
     for (let i = 0; i < lines.length; i++) {
@@ -351,6 +358,25 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
           isSystemMessage
         } : null
       });
+
+      if (!firstMessageDate && normalizedDate) {
+        firstMessageDate = normalizedDate
+      }
+
+      // Initialize unique words set for user if not exists
+      if (!uniqueWordsPerUser[user]) {
+        uniqueWordsPerUser[user] = new Set()
+      }
+
+      // Process words for uniqueness
+      const words = message.split(/\s+/)
+      words.forEach((word) => {
+        const cleanWord = word.toLowerCase().replace(/[^\w\s]/g, '')
+        if (cleanWord && !WHATSAPP_SYSTEM_WORDS.has(cleanWord) && (isNaN(Number(cleanWord)) || isNonLatinChar(cleanWord[0]))) {
+          uniqueWordsPerUser[user].add(cleanWord)
+          totalWordCount++
+        }
+      })
     }
 
     const sortedUsers = Object.entries(userStats).sort((a, b) => b[1].messageCount - a[1].messageCount)
@@ -512,6 +538,9 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       longestConversations,
       mostRepliedMessages,
       systemMessages,
+      firstMessageDate,
+      totalWordCount,
+      uniqueWordsPerUser,
     }
   } catch (error) {
     console.error('Error in processWhatsAppChat:', error)

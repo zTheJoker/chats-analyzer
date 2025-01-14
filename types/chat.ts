@@ -21,5 +21,8 @@ export interface ChatData {
   userMessageCountByDate: Record<string, Record<string, number>>
   averageMessagesByHour: { hour: number; average: number }[]
   messages: MessageData[]
+  firstMessageDate: string
+  totalWordCount: number
+  uniqueWordsPerUser: Record<string, Set<string>>
 }
 
