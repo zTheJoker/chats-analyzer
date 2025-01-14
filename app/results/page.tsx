@@ -14,6 +14,9 @@ import LongestConversations from '../../components/LongestConversations'
 import MostRepliedMessages from '../../components/MostRepliedMessages'
 import { ChatData } from '../../types/chat'
 import KeyStatistics from '../../components/KeyStatistics'
+import DownloadPDF from '../../components/DownloadPDF'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Info } from 'lucide-react'
 
 export default function Results() {
   const [chatData, setChatData] = useState<ChatData | null>(null)
@@ -55,8 +58,19 @@ export default function Results() {
 
   return (
     <main className="container mx-auto p-4">
-      <h1 className="text-4xl font-bold mb-8 text-center">WhatsApp Chat Analysis Results</h1>
-      <div className="space-y-8 mt-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-center">WhatsApp Chat Analysis Results</h1>
+        <DownloadPDF />
+      </div>
+
+      <Alert className="mb-8">
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          All processing is done locally in your browser. Your chat data never leaves your device.
+        </AlertDescription>
+      </Alert>
+
+      <div id="report-content" className="space-y-8">
         <KeyStatistics chatData={chatData} emojiStats={chatData.emojiStats} />
         <ChatStats chatData={chatData} />
         <WeekdayActivity data={chatData.weekdayActivity} />
