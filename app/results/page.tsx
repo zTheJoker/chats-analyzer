@@ -67,20 +67,12 @@ export default function Results() {
   }
 
   return (
-    <main className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-8">
+    <main className="container mx-auto p-4 min-h-screen flex flex-col">
+      <div className="mb-8">
         <h1 className="text-4xl font-bold text-center">WhatsApp Chat Analysis Results</h1>
-        <DownloadPDF />
       </div>
 
-      <Alert className="mb-8">
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          All processing is done locally in your browser. Your chat data never leaves your device.
-        </AlertDescription>
-      </Alert>
-
-      <div id="report-content" className="space-y-8">
+      <div id="report-content" className="space-y-8 flex-grow">
         <KeyStatistics chatData={chatData} emojiStats={chatData.emojiStats} />
         <ChatStats chatData={chatData} />
         <WeekdayActivity data={chatData.weekdayActivity} />
@@ -92,6 +84,29 @@ export default function Results() {
         <InactivityPeriods biggestTimeStop={chatData.biggestTimeStop} />
         <LongestConversations conversations={chatData.longestConversations} />
         <MostRepliedMessages messages={chatData.mostRepliedMessages} />
+      </div>
+
+      {/* Bottom section with download button and footer */}
+      <div className="mt-12 border-t border-gray-200 pt-6">
+        <div className="flex flex-col items-center gap-6">
+          <DownloadPDF />
+          
+          <Alert className="bg-gray-50 border-gray-200">
+            <Info className="h-4 w-4 text-gray-500" />
+            <AlertDescription className="text-sm text-gray-500">
+              All processing is done locally in your browser - your data never leaves your device.
+            </AlertDescription>
+          </Alert>
+
+          {/* Subtle footer */}
+          <div className="w-full text-center text-sm text-gray-400">
+            <a href="/terms" className="hover:text-gray-600">Terms</a>
+            {' · '}
+            <a href="/privacy" className="hover:text-gray-600">Privacy</a>
+            {' · '}
+            <a href="mailto:support@convoanalyzer.com" className="hover:text-gray-600">Support</a>
+          </div>
+        </div>
       </div>
     </main>
   )

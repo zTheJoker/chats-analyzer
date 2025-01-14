@@ -1,11 +1,11 @@
 export default function Privacy() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-16">
+    <main className="min-h-screen bg-white py-12">
       <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-3xl font-semibold mb-8 text-gray-800">Privacy Policy</h1>
           
-          <section className="prose prose-lg">
+          <section className="prose prose-sm text-gray-600">
             <h2>Your Data Privacy</h2>
             <p>
               At ConvoAnalyzer, we take your privacy seriously. Here's what you need to know about how we handle your data:
