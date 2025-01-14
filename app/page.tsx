@@ -16,6 +16,9 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true)
+    return () => {
+      setMounted(false)
+    }
   }, [])
 
   const handleFileUpload = async (file: File) => {
@@ -89,13 +92,7 @@ export default function Home() {
     }
   }
 
-  // Return null on server-side and during initial hydration
-  if (!mounted) {
-    return null
-  }
-
-  // Only render the actual content after hydration is complete
-  return (
+  const MainContent = () => (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
@@ -181,5 +178,20 @@ export default function Home() {
       </div>
     </main>
   )
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto">
+            <div className="h-12 bg-gray-200 rounded animate-pulse mb-6" />
+            <div className="h-6 bg-gray-200 rounded animate-pulse mb-12" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return <MainContent />
 }
 
