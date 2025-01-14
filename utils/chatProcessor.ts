@@ -93,25 +93,62 @@ export interface ChatData {
   systemMessages: string[]
 }
 
-function parseDate(dateString: string): Date | null {
-  const formats = [
-    'd/M/yy', 'd/M/yyyy', 'M/d/yy', 'M/d/yyyy', 'yyyy-MM-dd',
-    'dd.MM.yy', 'dd.MM.yyyy', 'MM.dd.yy', 'MM.dd.yyyy',
-    'dd-MM-yy', 'dd-MM-yyyy', 'MM-dd-yy', 'MM-dd-yyyy',
-    'yyyy/MM/dd', 'yy/MM/dd'
-  ]
+const MESSAGE_PATTERNS = [
+  // Standard format: [date], [time] - [user]: [message]
+  /^(\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}),?\s*(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*([^:]+):\s*(.+)$/,
   
+  // Alternative format: [date] [time] [user]: [message]
+  /^(\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4})\s*(\d{1,2}:\d{2}(?::\d{2})?)\s+([^:]+):\s*(.+)$/,
+  
+  // System message format: [date], [time] - [message]
+  /^(\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}),?\s*(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*(.+)$/
+];
+
+function parseDate(dateString: string): Date | null {
+  // Clean up the date string
+  const cleanDate = dateString.trim().replace(/[,]/g, '');
+  
+  // Define all possible date formats
+  const formats = [
+    'M/d/yy', 'M/d/yyyy', 'd/M/yy', 'd/M/yyyy',
+    'MM/dd/yy', 'MM/dd/yyyy', 'dd/MM/yy', 'dd/MM/yyyy',
+    'M-d-yy', 'M-d-yyyy', 'd-M-yy', 'd-M-yyyy',
+    'MM-dd-yy', 'MM-dd-yyyy', 'dd-MM-yy', 'dd-MM-yyyy',
+    'M.d.yy', 'M.d.yyyy', 'd.M.yy', 'd.M.yyyy',
+    'MM.dd.yy', 'MM.dd.yyyy', 'dd.MM.yy', 'dd.MM.yyyy',
+    'yyyy/MM/dd', 'yy/MM/dd', 'yyyy-MM-dd', 'yy-MM-dd',
+    'yyyy.MM.dd', 'yy.MM.dd'
+  ];
+
+  let parsedDate: Date | null = null;
+
   for (const dateFormat of formats) {
-    const parsedDate = parse(dateString, dateFormat, new Date())
-    if (isValid(parsedDate)) {
-      // Check if the year is in the future, and if so, subtract 100 years
-      if (parsedDate.getFullYear() > new Date().getFullYear() + 1) {
-        parsedDate.setFullYear(parsedDate.getFullYear() - 100)
+    try {
+      const attemptedDate = parse(cleanDate, dateFormat, new Date());
+      if (isValid(attemptedDate)) {
+        // Handle two-digit years
+        if (dateFormat.includes('yy') && !dateFormat.includes('yyyy')) {
+          const year = attemptedDate.getFullYear();
+          // If the year is in the future, subtract 100 years
+          if (year > new Date().getFullYear() + 1) {
+            attemptedDate.setFullYear(year - 100);
+          }
+        }
+        parsedDate = attemptedDate;
+        break;
       }
-      return parsedDate
+    } catch {
+      continue;
     }
   }
-  return null
+
+  return parsedDate;
+}
+
+function cleanupText(text: string): string {
+  // Remove Unicode control characters while preserving RTL markers
+  return text.replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+            .replace(/[\u200B-\u200F\u202A-\u202E]/g, '');
 }
 
 export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
@@ -125,6 +162,8 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
   if (lines.length === 0) {
     throw new Error('The chat file is empty')
   }
+
+  console.log('Sample of first few lines:', lines.slice(0, 5));
 
   const userStats: Record<string, UserStats> = {}
   const messageCountByDate: Record<string, number> = {}
@@ -153,121 +192,133 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       const line = lines[i].trim()
       if (!line) continue
 
-      // Match different date formats and message types
-      const match = line.match(/^(\S+),?\s?(\d{1,2}:\d{2}(?::\d{2})?)\s?(?:-|–)\s?(?:([^:]+):\s(.+)|(.+))/)
+      let match: RegExpMatchArray | null = null
+      let date: string | undefined
+      let time: string | undefined
+      let user: string | undefined
+      let message: string | undefined
+      let isSystemMessage = false
 
-      if (match) {
-        const [, date, time, user, message, systemMessage] = match
-
-        if (systemMessage) {
-          systemMessages.push(systemMessage)
-          continue
-        }
-
-        if (!date || !time) {
-          console.warn(`Skipping invalid line ${i + 1}: Missing date or time`)
-          skippedLines++
-          continue
-        }
-
-        // Normalize date format
-        const parsedDate = parseDate(date)
-        if (!parsedDate) {
-          console.warn(`Skipping invalid line ${i + 1}: Invalid date format - ${date}`)
-          skippedLines++
-          continue
-        }
-
-        const normalizedDate = format(parsedDate, 'dd/MM/yyyy')
-
-        // Validate time
-        const timeParts = time.split(':')
-        if (timeParts.length < 2 || timeParts.length > 3) {
-          console.warn(`Skipping invalid line ${i + 1}: Invalid time format - ${time}`)
-          skippedLines++
-          continue
-        }
-        const [hours, minutes] = timeParts
-        if (parseInt(hours) > 23 || parseInt(minutes) > 59) {
-          console.warn(`Skipping invalid line ${i + 1}: Invalid time values - ${time}`)
-          skippedLines++
-          continue
-        }
-
-        if (!user || !message) {
-          console.warn(`Skipping invalid line ${i + 1}: Missing user or message`)
-          skippedLines++
-          continue
-        }
-
-        // Process the message
-        if (!userStats[user]) {
-          userStats[user] = { messageCount: 0, wordCount: 0 }
-        }
-        if (!userMessageCountByDate[user]) {
-          userMessageCountByDate[user] = {}
-        }
-
-        userStats[user].messageCount++
-        totalMessages++
-
-        if (normalizedDate !== currentDate) {
-          currentDate = normalizedDate
-        }
-        messageCountByDate[normalizedDate] = (messageCountByDate[normalizedDate] || 0) + 1
-        userMessageCountByDate[user][normalizedDate] = (userMessageCountByDate[user][normalizedDate] || 0) + 1
-
-        const hour = parseInt(hours, 10)
-        messagesByHour[hour]++
-
-        const words = message.split(/\s+/)
-        words.forEach((word) => {
-          const cleanWord = word.toLowerCase().replace(/[^\w\s]/g, '')
-          if (cleanWord && !WHATSAPP_SYSTEM_WORDS.has(cleanWord) && (isNaN(Number(cleanWord)) || isNonLatinChar(cleanWord[0]))) {
-            wordFrequency[cleanWord] = (wordFrequency[cleanWord] || 0) + 1
-            userStats[user].wordCount++
+      // Try each pattern until we find a match
+      for (const pattern of MESSAGE_PATTERNS) {
+        match = line.match(pattern)
+        if (match) {
+          if (match.length === 5) {
+            // Regular message
+            [, date, time, user, message] = match
+          } else if (match.length === 4) {
+            // System message
+            [, date, time, message] = match
+            isSystemMessage = true
           }
-        })
-
-        const weekday = getWeekday(normalizedDate)
-        weekdayMessageCounts[weekday] = (weekdayMessageCounts[weekday] || 0) + 1
-
-        messageLengths.push(message.length)
-
-        const emojisInMessage = message.match(emojiRegex()) || []
-        emojisInMessage.forEach(emoji => {
-          emojiCounts[emoji] = (emojiCounts[emoji] || 0) + 1
-          userEmojiCounts[user] = (userEmojiCounts[user] || 0) + 1
-        })
-
-        const urlMatches = message.match(/https?:\/\/[^\s]+/g) || []
-        urlMatches.forEach(url => {
-          const domain = extractDomain(url)
-          linkCounts[domain] = (linkCounts[domain] || 0) + 1
-        })
-
-        if (normalizedDate !== lastMessageDate) {
-          firstMessageUsers[user] = (firstMessageUsers[user] || 0) + 1
-          if (lastMessageDate) {
-            lastMessageUsers[messages[messages.length - 1].user] = (lastMessageUsers[messages[messages.length - 1].user] || 0) + 1
-          }
-          lastMessageDate = normalizedDate
+          break
         }
+      }
 
-        lastMessageTime = time
-        messages.push({ date: normalizedDate, time, user, message })
-
-        processedLines++
-      } else {
-        console.warn(`Skipping invalid line ${i + 1}: ${line}`)
+      if (!match) {
+        // If no pattern matches, treat as system message
         systemMessages.push(line)
         skippedLines++
+        continue
       }
 
-      // Process in chunks to avoid blocking the main thread
-      if (i % 1000 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 0))
+      if (!date || !time) {
+        console.warn(`Skipping invalid line ${i + 1}: Missing date or time`)
+        skippedLines++
+        continue
       }
+
+      // Normalize date format
+      const parsedDate = parseDate(date)
+      if (!parsedDate) {
+        console.warn(`Skipping invalid line ${i + 1}: Invalid date format - ${date}`)
+        skippedLines++
+        continue
+      }
+
+      const normalizedDate = format(parsedDate, 'dd/MM/yyyy')
+
+      console.log('Parsed date:', {
+        original: date,
+        parsed: parsedDate,
+        normalized: normalizedDate
+      });
+
+      // Handle system messages
+      if (isSystemMessage) {
+        systemMessages.push(message!)
+        continue
+      }
+
+      // Process regular messages
+      if (!user || !message) {
+        console.warn(`Skipping invalid line ${i + 1}: Missing user or message`)
+        skippedLines++
+        continue
+      }
+
+      // Clean up user name and message
+      user = cleanupText(user.trim())
+      message = cleanupText(message.trim())
+
+      // Process the message
+      if (!userStats[user]) {
+        userStats[user] = { messageCount: 0, wordCount: 0 }
+      }
+      if (!userMessageCountByDate[user]) {
+        userMessageCountByDate[user] = {}
+      }
+
+      userStats[user].messageCount++
+      totalMessages++
+
+      if (normalizedDate !== currentDate) {
+        currentDate = normalizedDate
+      }
+      messageCountByDate[normalizedDate] = (messageCountByDate[normalizedDate] || 0) + 1
+      userMessageCountByDate[user][normalizedDate] = (userMessageCountByDate[user][normalizedDate] || 0) + 1
+
+      const hour = parseInt(time.split(':')[0], 10)
+      messagesByHour[hour]++
+
+      const words = message.split(/\s+/)
+      words.forEach((word) => {
+        const cleanWord = word.toLowerCase().replace(/[^\w\s]/g, '')
+        if (cleanWord && !WHATSAPP_SYSTEM_WORDS.has(cleanWord) && (isNaN(Number(cleanWord)) || isNonLatinChar(cleanWord[0]))) {
+          wordFrequency[cleanWord] = (wordFrequency[cleanWord] || 0) + 1
+          userStats[user].wordCount++
+        }
+      })
+
+      const weekday = getWeekday(normalizedDate)
+      weekdayMessageCounts[weekday] = (weekdayMessageCounts[weekday] || 0) + 1
+
+      messageLengths.push(message.length)
+
+      const emojisInMessage = message.match(emojiRegex()) || []
+      emojisInMessage.forEach(emoji => {
+        emojiCounts[emoji] = (emojiCounts[emoji] || 0) + 1
+        userEmojiCounts[user] = (userEmojiCounts[user] || 0) + 1
+      })
+
+      const urlMatches = message.match(/https?:\/\/[^\s]+/g) || []
+      urlMatches.forEach(url => {
+        const domain = extractDomain(url)
+        linkCounts[domain] = (linkCounts[domain] || 0) + 1
+      })
+
+      if (normalizedDate !== lastMessageDate) {
+        firstMessageUsers[user] = (firstMessageUsers[user] || 0) + 1
+        if (lastMessageDate) {
+          lastMessageUsers[messages[messages.length - 1].user] = (lastMessageUsers[messages[messages.length - 1].user] || 0) + 1
+        }
+        lastMessageDate = normalizedDate
+      }
+
+      lastMessageTime = time
+      messages.push({ date: normalizedDate, time, user, message })
+
+      processedLines++
     }
 
     const sortedUsers = Object.entries(userStats).sort((a, b) => b[1].messageCount - a[1].messageCount)
