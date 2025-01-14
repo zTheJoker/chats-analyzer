@@ -25,6 +25,11 @@ const KeyStatistics: React.FC<KeyStatisticsProps> = ({ chatData, emojiStats }) =
   const avgWordsPerMessage = Math.round(totalWords / chatData.totalMessages)
   const userCount = Object.keys(chatData.userStats).length
   
+  const formattedDate = new Date(chatData.firstMessageDate).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  })
+  
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
       <h2 className="text-3xl font-semibold mb-6 text-gray-800">Chat Overview</h2>
@@ -39,20 +44,20 @@ const KeyStatistics: React.FC<KeyStatisticsProps> = ({ chatData, emojiStats }) =
             {userCount}
           </p>
           <p className="text-sm text-blue-600 mt-1">
-            Since {chatData.firstMessageDate}
+            Since {formattedDate}
           </p>
         </div>
         
         <div className="bg-purple-50 rounded-xl p-6 border border-purple-100">
           <div className="flex items-center gap-3 mb-2">
             <Type className="w-5 h-5 text-purple-600" />
-            <h3 className="text-lg font-medium text-gray-800">Total Words</h3>
+            <h3 className="text-lg font-medium text-gray-800">Total Words Sent</h3>
           </div>
           <p className="text-3xl font-semibold text-purple-700">
             {totalWords.toLocaleString()}
           </p>
           <p className="text-sm text-purple-600 mt-1">
-            ~{avgWordsPerMessage} words per message
+            Average {avgWordsPerMessage} words per message
           </p>
         </div>
 

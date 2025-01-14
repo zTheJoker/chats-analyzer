@@ -83,5 +83,6 @@ export interface ChatData {
       count: number;
     }>;
   };
+  firstMessageDate: string;
 }
 

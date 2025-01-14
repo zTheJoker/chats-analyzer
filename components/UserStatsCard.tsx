@@ -28,19 +28,19 @@ const UserStatsCard: React.FC<UserStatsCardProps> = ({ user, stats, uniqueWords,
       <CardContent>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-gray-600">Messages</p>
+            <p className="text-sm text-gray-600">Messages Sent</p>
             <p className="text-2xl font-semibold">{stats.messageCount.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600">Total Words Used</p>
+            <p className="text-sm text-gray-600">Words Written</p>
             <p className="text-2xl font-semibold">{stats.wordCount.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600">Vocabulary Size</p>
+            <p className="text-sm text-gray-600">Unique Words Used</p>
             <p className="text-2xl font-semibold">{uniqueWords.size.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600">Words/Message</p>
+            <p className="text-sm text-gray-600">Avg Words/Message</p>
             <p className="text-2xl font-semibold">{averageWordsPerMessage}</p>
           </div>
         </div>
