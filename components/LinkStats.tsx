@@ -17,8 +17,15 @@ const LinkStats: React.FC<LinkStatsProps> = ({ linkStats }) => {
       <h4 className="text-lg font-medium mb-2">Top 5 Domains</h4>
       <ul className="space-y-2">
         {sortedDomains.map(([domain, count], index) => (
-          <li key={index} className="flex justify-between">
-            <span>{domain}</span>
+          <li key={index} className="flex justify-between items-center">
+            <a 
+              href={`https://${domain}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-blue-600 hover:underline transition-colors duration-200"
+            >
+              {domain}
+            </a>
             <span>{count} links</span>
           </li>
         ))}

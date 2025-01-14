@@ -24,6 +24,13 @@ const DownloadPDF: React.FC = () => {
       const element = document.getElementById('report-content')
       if (!element) throw new Error('Report content not found')
 
+      // Add page-break-inside: avoid to major components
+      const components = element.querySelectorAll('.card, .chart-container, .stats-container')
+      components.forEach(comp => {
+        (comp as HTMLElement).style.pageBreakInside = 'avoid'
+        ;(comp as HTMLElement).style.breakInside = 'avoid'
+      })
+
       const opt = {
         margin: isMobile ? 8 : 10,
         filename: 'whatsapp-chat-analysis.pdf',
@@ -32,14 +39,15 @@ const DownloadPDF: React.FC = () => {
           scale: isMobile ? 1.5 : 2,
           useCORS: true,
           logging: false,
-          scrollY: -window.scrollY // Fix for scrolled content
+          scrollY: -window.scrollY
         },
         jsPDF: { 
           unit: 'mm', 
           format: 'a4', 
           orientation: 'portrait',
           compress: true
-        }
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       }
 
       // Temporarily hide any expanded content
@@ -50,6 +58,12 @@ const DownloadPDF: React.FC = () => {
       
       // Restore expanded content visibility
       expandedElements.forEach(el => (el as HTMLElement).style.display = '')
+
+      // Reset the styles after PDF generation
+      components.forEach(comp => {
+        (comp as HTMLElement).style.pageBreakInside = ''
+        ;(comp as HTMLElement).style.breakInside = ''
+      })
 
       toast({
         title: "Success!",

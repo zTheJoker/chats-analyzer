@@ -32,11 +32,11 @@ const UserStatsCard: React.FC<UserStatsCardProps> = ({ user, stats, uniqueWords,
             <p className="text-2xl font-semibold">{stats.messageCount.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600">Words</p>
+            <p className="text-sm text-gray-600">Total Words Used</p>
             <p className="text-2xl font-semibold">{stats.wordCount.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600">Unique Words</p>
+            <p className="text-sm text-gray-600">Vocabulary Size</p>
             <p className="text-2xl font-semibold">{uniqueWords.size.toLocaleString()}</p>
           </div>
           <div>
