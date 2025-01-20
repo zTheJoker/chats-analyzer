@@ -5,15 +5,33 @@ import { Analytics } from "@vercel/analytics/react"
 
 export const metadata: Metadata = {
   title: {
-    default: 'WhatsApp Chat Analyzer',
+    default: 'WhatsApp Chat Analyzer - Free Online Chat Analysis Tool',
     template: '%s | WhatsApp Chat Analyzer'
   },
-  description: 'Analyze your WhatsApp chats with our powerful, private, and secure analyzer. All processing happens in your browser.',
-  keywords: ['WhatsApp', 'chat analysis', 'conversation analyzer', 'message statistics', 'chat insights'],
+  description: 'Free WhatsApp chat analyzer tool. Analyze message patterns, emoji usage, chat statistics, and more. 100% private - all processing happens in your browser.',
+  keywords: [
+    'WhatsApp chat analyzer',
+    'WhatsApp message analysis',
+    'chat statistics',
+    'WhatsApp conversation analysis',
+    'message patterns',
+    'chat insights',
+    'WhatsApp data analysis',
+    'chat history analyzer',
+    'WhatsApp chat statistics',
+    'analyze WhatsApp messages'
+  ],
   authors: [{ name: 'ConvoAnalyzer' }],
   creator: 'ConvoAnalyzer',
   publisher: 'ConvoAnalyzer',
-  robots: 'index, follow',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
   icons: {
     icon: '/logo.svg',
     shortcut: '/logo.svg',
@@ -23,16 +41,30 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://convoanalyzer.com',
-    title: 'WhatsApp Chat Analyzer',
-    description: 'Analyze your WhatsApp chats with our powerful, private, and secure analyzer',
+    title: 'WhatsApp Chat Analyzer - Free Online Chat Analysis Tool',
+    description: 'Analyze your WhatsApp chats instantly. Get message patterns, emoji stats, and chat insights. 100% private - your data never leaves your device.',
     siteName: 'WhatsApp Chat Analyzer',
-    images: ['/logo.svg'],
+    images: [{
+      url: '/logo.svg',
+      width: 1200,
+      height: 630,
+      alt: 'WhatsApp Chat Analyzer Logo'
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'WhatsApp Chat Analyzer',
-    description: 'Analyze your WhatsApp chats with our powerful, private, and secure analyzer',
-    images: ['/logo.svg'],
+    title: 'WhatsApp Chat Analyzer - Free Online Chat Analysis Tool',
+    description: 'Analyze your WhatsApp chats instantly. Get message patterns, emoji stats, and chat insights. 100% private - your data never leaves your device.',
+    images: [{
+      url: '/logo.svg',
+      alt: 'WhatsApp Chat Analyzer Logo'
+    }],
+  },
+  alternates: {
+    canonical: 'https://convoanalyzer.com'
+  },
+  verification: {
+    google: 'your-google-site-verification', // Add your Google verification code if you have one
   }
 }
 

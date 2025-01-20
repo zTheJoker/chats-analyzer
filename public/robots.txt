@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
+Disallow: /results
 
-Sitemap: https://convoanalyzer.com/sitemap.xml 
+# Allow search engines to crawl the sitemap
+Sitemap: https://convoanalyzer.com/sitemap.xml
+
+# Crawl-delay for better server performance
+Crawl-delay: 1 
