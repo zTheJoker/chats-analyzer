@@ -8,62 +8,75 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { useRouter } from 'next/navigation'
 
-export function PremiumOfferPopup() {
+export function PremiumOfferPopup({ isResultsPage = false }) {
   const [isOpen, setIsOpen] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
-    // Show popup after 20 seconds
-    const timer = setTimeout(() => {
-      setIsOpen(true)
-    }, 20000)
+    // Check if popup has been shown in this session
+    const hasBeenShown = localStorage.getItem('premiumPopupShown')
+    
+    if (!hasBeenShown) {
+      const timer = setTimeout(() => {
+        setIsOpen(true)
+        localStorage.setItem('premiumPopupShown', 'true')
+      }, isResultsPage ? 5000 : 20000) // Show after 5 seconds on results page, 20 seconds on home
 
-    return () => clearTimeout(timer)
-  }, [])
+      return () => clearTimeout(timer)
+    }
+  }, [isResultsPage])
 
   const handleGetStarted = () => {
-    // TODO: Implement payment flow
-    console.log('Starting premium subscription flow')
+    // For now, just open a mailto link
+    window.location.href = 'mailto:support@convoanalyzer.com?subject=Premium%20Access%20Request'
     setIsOpen(false)
-    // For now, just close the popup
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Unlock Premium AI Analysis</DialogTitle>
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+            Unlock Premium AI Analysis
+          </DialogTitle>
           <DialogDescription className="mt-4 space-y-3">
             <p className="text-lg">
-              Get deeper insights into your conversations with our advanced AI analysis.
+              Ready to get deeper insights from your conversations?
             </p>
             <div className="space-y-2">
-              <p className="flex items-center">
-                ✨ Full AI chat analysis
+              <p className="flex items-center gap-2">
+                <span className="text-xl">✨</span>
+                <span>Full AI chat analysis with sentiment tracking</span>
               </p>
-              <p className="flex items-center">
-                🤖 Chat with AI about your conversations
+              <p className="flex items-center gap-2">
+                <span className="text-xl">🤖</span>
+                <span>Interactive AI chat about your conversations</span>
               </p>
-              <p className="flex items-center">
-                🧠 Psychological insights and patterns
+              <p className="flex items-center gap-2">
+                <span className="text-xl">🧠</span>
+                <span>Deep psychological insights and patterns</span>
               </p>
-              <p className="flex items-center">
-                📊 Detailed relationship dynamics
+              <p className="flex items-center gap-2">
+                <span className="text-xl">📊</span>
+                <span>Advanced relationship dynamics analysis</span>
               </p>
             </div>
-            <p className="font-semibold text-primary mt-4">
-              All this for just $3.99!
-            </p>
+            <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+              <p className="font-semibold text-center bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+                Special Launch Price: $3.99
+              </p>
+            </div>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-6">
           <Button variant="outline" onClick={() => setIsOpen(false)}>
             Maybe later
           </Button>
-          <Button onClick={handleGetStarted} className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
-            Get Started
+          <Button 
+            onClick={handleGetStarted} 
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+          >
+            Get Premium Access
           </Button>
         </DialogFooter>
       </DialogContent>

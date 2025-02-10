@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ChatData } from '@/types/chat'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Info } from 'lucide-react'
+import { PremiumOfferPopup } from '@/components/PremiumOfferPopup'
 
 // Dynamically import components with ssr disabled
 const ChatStats = dynamic(() => import('@/components/ChatStats'), { ssr: false })
@@ -68,6 +69,7 @@ export default function Results() {
 
   return (
     <main className="min-h-screen bg-gray-50">
+      <PremiumOfferPopup isResultsPage={true} />
       <div className="container mx-auto px-4 py-6 md:py-12">
         <div className="mb-6 md:mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-center">
