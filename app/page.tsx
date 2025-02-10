@@ -6,6 +6,7 @@ import FileUpload from '../components/FileUpload'
 import Benefits from '../components/Benefits'
 import { processWhatsAppChat } from '../utils/chatProcessor'
 import Link from 'next/link'
+import { PremiumOfferPopup } from '../components/PremiumOfferPopup'
 
 export default function Home() {
   const [mounted, setMounted] = useState(false)
@@ -192,6 +193,11 @@ export default function Home() {
     )
   }
 
-  return <MainContent />
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <PremiumOfferPopup />
+      <MainContent />
+    </main>
+  )
 }
 
