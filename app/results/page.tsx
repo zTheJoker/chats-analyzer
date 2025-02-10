@@ -7,6 +7,7 @@ import { ChatData } from '@/types/chat'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Info } from 'lucide-react'
 import { PremiumOfferPopup } from '@/components/PremiumOfferPopup'
+import { dbService } from '@/utils/storage'
 
 // Dynamically import components with ssr disabled
 const ChatStats = dynamic(() => import('@/components/ChatStats'), { ssr: false })
@@ -24,6 +25,7 @@ const DownloadPDF = dynamic(() => import('@/components/DownloadPDF'), { ssr: fal
 
 export default function Results() {
   const [chatData, setChatData] = useState<ChatData | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -31,40 +33,59 @@ export default function Results() {
 
     const fetchData = async () => {
       try {
-        const dbName = 'WhatsAppAnalyzer'
-        const storeName = 'chatData'
-        const request = indexedDB.open(dbName, 1)
-
-        request.onsuccess = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result
-          const transaction = db.transaction(storeName, 'readonly')
-          const store = transaction.objectStore(storeName)
-          const getRequest = store.get('currentChat')
-
-          getRequest.onsuccess = () => {
-            if (getRequest.result) {
-              setChatData(getRequest.result)
-            } else {
-              router.push('/')
-            }
+        // Initialize IndexedDB
+        await dbService.init({
+          onError: (error) => {
+            console.error('IndexedDB error:', error)
+            setError('Failed to access storage. Please try using a different browser or enable cookies.')
+            setTimeout(() => router.push('/'), 3000)
+          },
+          onBlocked: () => {
+            setError('Please close other tabs with this site open and try again.')
+            setTimeout(() => router.push('/'), 3000)
           }
-        }
+        })
 
-        request.onerror = () => {
-          console.error('Error opening IndexedDB')
-          router.push('/')
+        // Retrieve chat data
+        const data = await dbService.retrieve('currentChat')
+        if (data) {
+          setChatData(data)
+        } else {
+          setError('No chat data found. Please upload a chat file first.')
+          setTimeout(() => router.push('/'), 3000)
         }
       } catch (error) {
         console.error('Error fetching data:', error)
-        router.push('/')
+        setError('Failed to load chat data. Please try again.')
+        setTimeout(() => router.push('/'), 3000)
       }
     }
 
     fetchData()
+
+    return () => {
+      dbService.close()
+    }
   }, [router])
 
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
+          <p className="mt-2 text-sm">Redirecting to home page...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (!chatData) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    )
   }
 
   return (

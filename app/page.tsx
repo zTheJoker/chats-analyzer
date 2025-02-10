@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import FileUpload from '../components/FileUpload'
 import Benefits from '../components/Benefits'
 import { processWhatsAppChat } from '../utils/chatProcessor'
+import { dbService } from '../utils/storage'
 import Link from 'next/link'
 import { PremiumOfferPopup } from '../components/PremiumOfferPopup'
 
@@ -17,8 +18,27 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true)
+    // Initialize IndexedDB when component mounts
+    const initDB = async () => {
+      try {
+        await dbService.init({
+          onError: (error) => {
+            console.error('IndexedDB error:', error)
+            setError('Failed to initialize storage. Please try using a different browser or enable cookies.')
+          },
+          onBlocked: () => {
+            setError('Please close other tabs with this site open and try again.')
+          }
+        })
+      } catch (error) {
+        console.error('Failed to initialize IndexedDB:', error)
+        setError('Storage initialization failed. Please try using a different browser or enable cookies.')
+      }
+    }
+    initDB()
     return () => {
       setMounted(false)
+      dbService.close()
     }
   }, [])
 
@@ -33,50 +53,16 @@ export default function Home() {
       }
       const processedData = await processWhatsAppChat(text)
       
-      // Only run IndexedDB code on the client
-      if (typeof window !== 'undefined') {
-        const dbName = 'WhatsAppAnalyzer'
-        const storeName = 'chatData'
-        
-        try {
-          await new Promise((resolve, reject) => {
-            const request = indexedDB.open(dbName, 1)
-            
-            request.onupgradeneeded = (event) => {
-              const db = (event.target as IDBOpenDBRequest).result
-              if (!db.objectStoreNames.contains(storeName)) {
-                db.createObjectStore(storeName)
-              }
-            }
-
-            request.onsuccess = (event) => {
-              const db = (event.target as IDBOpenDBRequest).result
-              const transaction = db.transaction(storeName, 'readwrite')
-              const store = transaction.objectStore(storeName)
-              store.put(processedData, 'currentChat')
-
-              transaction.oncomplete = () => {
-                setProcessingStats({
-                  processed: processedData.totalMessages,
-                  skipped: processedData.systemMessages.length
-                })
-                resolve(true)
-                router.push('/results')
-              }
-
-              transaction.onerror = () => {
-                reject(new Error('Failed to store chat data in IndexedDB'))
-              }
-            }
-
-            request.onerror = () => {
-              reject(new Error('Failed to open IndexedDB'))
-            }
-          })
-        } catch (dbError) {
-          console.error('IndexedDB error:', dbError)
-          throw new Error('Failed to store data: ' + (dbError instanceof Error ? dbError.message : 'Unknown error'))
-        }
+      try {
+        await dbService.store('currentChat', processedData)
+        setProcessingStats({
+          processed: processedData.totalMessages,
+          skipped: processedData.systemMessages.length
+        })
+        router.push('/results')
+      } catch (dbError) {
+        console.error('Storage error:', dbError)
+        throw new Error('Failed to store chat data. Please try using a different browser or enable cookies.')
       }
     } catch (err) {
       console.error('Error processing chat data:', err)
