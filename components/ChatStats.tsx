@@ -59,7 +59,11 @@ const ChatStats: React.FC<ChatStatsProps> = ({ chatData }) => {
                 <p className="text-sm text-purple-700">Total words written</p>
               </div>
               <div className="pt-2 border-t border-purple-200">
-                <p className="text-xl font-semibold text-purple-900">{chatData.wordStats.averageWordsPerMessage.toFixed(1)}</p>
+                <p className="text-xl font-semibold text-purple-900">
+                  {chatData.totalWordCount && chatData.totalMessages 
+                    ? (chatData.totalWordCount / chatData.totalMessages).toFixed(1) 
+                    : '0.0'}
+                </p>
                 <p className="text-sm text-purple-700">Average words per message</p>
               </div>
             </div>

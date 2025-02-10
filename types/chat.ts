@@ -12,6 +12,12 @@ export interface MessageData {
 
 export interface ChatData {
   totalMessages: number;
+  totalWordCount: number;
+  averageMessagesPerDay: number;
+  mostActiveUser: string;
+  leastActiveUser: string;
+  messageCountByDate: Record<string, number>;
+  userMessageCountByDate: Record<string, Record<string, number>>;
   userStats: {
     [key: string]: {
       messageCount: number;
@@ -31,9 +37,10 @@ export interface ChatData {
     count: number;
   }>;
   longestMessages: Array<{
+    date: string;
+    time: string;
     user: string;
     message: string;
-    timestamp: Date;
   }>;
   emojiStats: Array<{
     emoji: string;
@@ -49,40 +56,36 @@ export interface ChatData {
       [key: string]: number;
     };
   };
-  conversationStarters: Array<{
-    user: string;
-    count: number;
-  }>;
+  conversationStarters: {
+    firstMessage: Record<string, number>;
+    lastMessage: Record<string, number>;
+  };
   biggestTimeStop: {
-    start: Date;
-    end: Date;
+    start: string;
+    end: string;
     duration: number;
-  };
+  } | null;
   longestConversations: Array<{
-    messages: Array<{
-      user: string;
-      message: string;
-      timestamp: Date;
-    }>;
-    duration: number;
-  }>;
+    date: string;
+    time: string;
+    user: string;
+    message: string;
+  }>[];
   mostRepliedMessages: Array<{
-    originalMessage: {
+    message: {
+      date: string;
+      time: string;
       user: string;
       message: string;
-      timestamp: Date;
     };
-    replies: number;
+    replyCount: number;
   }>;
-  wordStats: {
-    totalWords: number;
-    averageWordsPerMessage: number;
-    uniqueWords: number;
-    mostCommonWords: Array<{
-      word: string;
-      count: number;
-    }>;
-  };
   firstMessageDate: string;
+  mostCommonWords: Array<[string, number]>;
+  averageMessagesByHour: Array<{
+    hour: number;
+    average: number;
+  }>;
+  systemMessages: string[];
 }
 

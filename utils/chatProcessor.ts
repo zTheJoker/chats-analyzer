@@ -1,4 +1,4 @@
-import { ChatData, UserStats, MessageData } from '../types/chat'
+import { UserStats, MessageData } from '../types/chat'
 import { parse, format, isValid } from 'date-fns'
 import emojiRegex from 'emoji-regex'
 
@@ -198,46 +198,42 @@ function processWords(message: string, user: string) {
 }
 
 export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
-  let processedLines = 0
-  let skippedLines = 0
-  if (!chatText || typeof chatText !== 'string') {
-    throw new Error('Invalid chat text provided')
-  }
-
-  const lines = chatText.split('\n')
-  if (lines.length === 0) {
-    throw new Error('The chat file is empty')
-  }
-
-  console.log('Sample of first few lines:', lines.slice(0, 5));
-
-  const userStats: Record<string, UserStats> = {}
-  const messageCountByDate: Record<string, number> = {}
-  const userMessageCountByDate: Record<string, Record<string, number>> = {}
-  const wordFrequency: Record<string, number> = {}
-  const messagesByHour: number[] = new Array(24).fill(0)
-  const messages: MessageData[] = []
-
-  let totalMessages = 0
-  let currentDate = ''
-
-  const weekdayMessageCounts: Record<string, number> = {}
-  const messageLengths: number[] = []
-  const emojiCounts: Record<string, number> = {}
-  const userEmojiCounts: Record<string, number> = {}
-  const linkCounts: Record<string, number> = {}
-  const firstMessageUsers: Record<string, number> = {}
-  const lastMessageUsers: Record<string, number> = {}
-  let lastMessageDate = ''
-  let lastMessageTime = ''
-
-  const systemMessages: string[] = []
-
-  const uniqueWordsPerUser: Record<string, Set<string>> = {}
-  let firstMessageDate = ''
-  let totalWordCount = 0
-
   try {
+    if (!chatText || typeof chatText !== 'string') {
+      throw new Error('Invalid chat text provided')
+    }
+
+    const lines = chatText.split('\n')
+    if (lines.length === 0) {
+      throw new Error('The chat file is empty')
+    }
+
+    // Initialize all required data structures with default values
+    const userStats: Record<string, UserStats> = {}
+    const messageCountByDate: Record<string, number> = {}
+    const userMessageCountByDate: Record<string, Record<string, number>> = {}
+    const wordFrequency: Record<string, number> = {}
+    const messagesByHour: number[] = new Array(24).fill(0)
+    const messages: MessageData[] = []
+    const weekdayMessageCounts: Record<string, number> = {}
+    const messageLengths: number[] = []
+    const emojiCounts: Record<string, number> = {}
+    const userEmojiCounts: Record<string, number> = {}
+    const linkCounts: Record<string, number> = {}
+    const firstMessageUsers: Record<string, number> = {}
+    const lastMessageUsers: Record<string, number> = {}
+    const systemMessages: string[] = []
+    const uniqueWordsPerUser: Record<string, Set<string>> = {}
+    
+    let totalMessages = 0
+    let totalWordCount = 0
+    let firstMessageDate = ''
+    let processedLines = 0
+    let skippedLines = 0
+    let currentDate = ''
+    let lastMessageDate = ''
+    let lastMessageTime = ''
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim()
       if (!line) continue
@@ -289,31 +285,23 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
         continue
       }
 
-      // Normalize date format
-      const parsedDate = parseDate(date)
-      if (!parsedDate) {
-        console.warn(`Skipping invalid line ${i + 1}: Invalid date format - ${date}`)
-        skippedLines++
-        continue
-      }
-
-      const normalizedDate = format(parsedDate, 'dd/MM/yyyy')
-
-      console.log('Parsed date:', {
-        original: date,
-        parsed: parsedDate,
-        normalized: normalizedDate
-      });
-
       // Handle system messages
       if (isSystemMessage) {
-        systemMessages.push(message!)
+        systemMessages.push(message || '')
         continue
       }
 
       // Process regular messages
-      if (!user || !message) {
-        console.warn(`Skipping invalid line ${i + 1}: Missing user or message`)
+      if (!user || !message || !time || !date) {
+        console.warn(`Skipping invalid line ${i + 1}: Missing required data`)
+        skippedLines++
+        continue
+      }
+
+      // Parse the date
+      const parsedDate = parse(date, 'dd/MM/yyyy', new Date())
+      if (!isValid(parsedDate)) {
+        console.warn(`Skipping invalid line ${i + 1}: Invalid date format`)
         skippedLines++
         continue
       }
@@ -321,6 +309,16 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       // Clean up user name and message
       user = cleanupText(user.trim())
       message = cleanupText(message.trim())
+      const normalizedDate = format(parsedDate, 'dd/MM/yyyy')
+
+      // Add message to messages array
+      const messageData: MessageData = {
+        date: normalizedDate,
+        time,
+        user,
+        message
+      }
+      messages.push(messageData)
 
       // Process the message
       if (!userStats[user]) {
@@ -388,7 +386,6 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       }
 
       lastMessageTime = time
-      messages.push({ date: normalizedDate, time, user, message })
 
       processedLines++
 
@@ -430,12 +427,14 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       }
     }
 
-    const sortedUsers = Object.entries(userStats).sort((a, b) => b[1].messageCount - a[1].messageCount)
-    const mostActiveUser = sortedUsers[0]?.[0] || 'N/A'
-    const leastActiveUser = sortedUsers[sortedUsers.length - 1]?.[0] || 'N/A'
+    // Ensure safe calculations
+    const totalDays = Object.keys(messageCountByDate).length || 1
+    const averageMessagesPerDay = totalMessages / totalDays
 
-    const totalDays = Object.keys(messageCountByDate).length
-    const averageMessagesPerDay = totalDays > 0 ? totalMessages / totalDays : 0
+    // Sort users by message count
+    const sortedUsers = Object.entries(userStats).sort((a, b) => b[1].messageCount - a[1].messageCount)
+    const mostActiveUser = sortedUsers[0]?.[0] || 'Unknown'
+    const leastActiveUser = sortedUsers[sortedUsers.length - 1]?.[0] || 'Unknown'
 
     const mostCommonWords = Object.entries(wordFrequency)
       .sort((a, b) => b[1] - a[1])
@@ -443,7 +442,7 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
 
     const averageMessagesByHour = messagesByHour.map((count, hour) => ({
       hour,
-      average: totalDays > 0 ? count / totalDays : 0,
+      average: count / totalDays,
     }))
 
     // Calculate weekday activity
@@ -455,20 +454,12 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
 
     // Calculate message length distribution
     const messageLengthDistribution: MessageLengthDistribution[] = [
-      { range: '0-10', count: 0 },
-      { range: '11-20', count: 0 },
-      { range: '21-50', count: 0 },
-      { range: '51-100', count: 0 },
-      { range: '101+', count: 0 }
+      { range: '0-10', count: messageLengths.filter(l => l <= 10).length },
+      { range: '11-20', count: messageLengths.filter(l => l > 10 && l <= 20).length },
+      { range: '21-50', count: messageLengths.filter(l => l > 20 && l <= 50).length },
+      { range: '51-100', count: messageLengths.filter(l => l > 50 && l <= 100).length },
+      { range: '101+', count: messageLengths.filter(l => l > 100).length },
     ]
-
-    messageLengths.forEach(length => {
-      if (length <= 10) messageLengthDistribution[0].count++
-      else if (length <= 20) messageLengthDistribution[1].count++
-      else if (length <= 50) messageLengthDistribution[2].count++
-      else if (length <= 100) messageLengthDistribution[3].count++
-      else messageLengthDistribution[4].count++
-    })
 
     // Get top 5 longest messages
     const longestMessages = messages
@@ -568,6 +559,7 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
     console.log(`Processed ${processedLines} lines, skipped ${skippedLines} lines.`)
     return {
       totalMessages,
+      totalWordCount,
       userStats,
       mostActiveUser,
       leastActiveUser,
@@ -589,8 +581,7 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       longestConversations,
       mostRepliedMessages,
       systemMessages,
-      firstMessageDate,
-      totalWordCount,
+      firstMessageDate: firstMessageDate || new Date().toISOString().split('T')[0],
       uniqueWordsPerUser,
     }
   } catch (error) {
