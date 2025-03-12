@@ -21,6 +21,7 @@ const InactivityPeriods = dynamic(() => import('@/components/InactivityPeriods')
 const LongestConversations = dynamic(() => import('@/components/LongestConversations'), { ssr: false })
 const MostRepliedMessages = dynamic(() => import('@/components/MostRepliedMessages'), { ssr: false })
 const KeyStatistics = dynamic(() => import('@/components/KeyStatistics'), { ssr: false })
+const ResponseTimeStats = dynamic(() => import('@/components/ResponseTimeStats'), { ssr: false })
 const DownloadPDF = dynamic(() => import('@/components/DownloadPDF'), { ssr: false })
 
 export default function Results() {
@@ -92,6 +93,9 @@ export default function Results() {
     <main className="min-h-screen bg-gray-50">
       <PremiumOfferPopup isResultsPage={true} />
       <div className="container mx-auto px-4 py-6 md:py-12">
+        <div className="flex items-center justify-between mb-8">
+          <img src="/logo.png" alt="WhatsApp Analyzer Logo" className="h-10 md:h-16 w-auto" />
+        </div>
         <div className="mb-6 md:mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-center">
             WhatsApp Chat Analysis Results
@@ -103,6 +107,9 @@ export default function Results() {
           <ChatStats chatData={chatData} />
           <WeekdayActivity data={chatData.weekdayActivity} />
           <MessageLengthDistribution data={chatData.messageLengthDistribution} />
+          {chatData.responseTimeStats && (
+            <ResponseTimeStats responseTimeStats={chatData.responseTimeStats} />
+          )}
           <LongestMessages messages={chatData.longestMessages} />
           <EmojiStats emojiStats={chatData.emojiStats} userEmojiStats={chatData.userEmojiStats} />
           <LinkStats linkStats={chatData.linkStats} />
@@ -125,7 +132,7 @@ export default function Results() {
 
             <div className="w-full flex flex-col items-center text-center text-sm text-gray-400 py-4">
               <div className="mb-4">
-                <img src="/logo.svg" alt="WhatsApp Analyzer Logo" className="h-10 w-auto" />
+                <img src="/logo.png" alt="WhatsApp Analyzer Logo" className="h-10 w-auto" />
               </div>
               <div>
                 <a href="/terms" className="hover:text-gray-600">Terms</a>

@@ -622,6 +622,73 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       .slice(0, 3)
 
     console.log(`Processed ${processedLines} lines, skipped ${skippedLines} lines.`)
+    // Calculate response time statistics
+    const responseTimesInSeconds: number[] = [];
+    const userResponseTimes: Record<string, number[]> = {};
+
+    // Process messages to calculate response times
+    for (let i = 1; i < messages.length; i++) {
+      const prevMessage = messages[i - 1];
+      const currMessage = messages[i];
+      
+      // Only calculate if different users (responses, not self-replies)
+      if (prevMessage.user !== currMessage.user) {
+        try {
+          const prevDateTime = parse(`${prevMessage.date} ${prevMessage.time}`, 'dd/MM/yyyy HH:mm:ss', new Date());
+          const currDateTime = parse(`${currMessage.date} ${currMessage.time}`, 'dd/MM/yyyy HH:mm:ss', new Date());
+          
+          // Calculate difference in seconds
+          const diffSeconds = (currDateTime.getTime() - prevDateTime.getTime()) / 1000;
+          
+          // Skip unrealistically long response times (e.g., over 24 hours)
+          if (diffSeconds > 0 && diffSeconds < 86400) {
+            responseTimesInSeconds.push(diffSeconds);
+            
+            // Track by responder
+            if (!userResponseTimes[currMessage.user]) {
+              userResponseTimes[currMessage.user] = [];
+            }
+            userResponseTimes[currMessage.user].push(diffSeconds);
+          }
+        } catch (error) {
+          console.warn('Error calculating response time:', error);
+          // Continue processing other messages
+        }
+      }
+    }
+
+    // Calculate average response time
+    const averageResponseTime = responseTimesInSeconds.length > 0 
+      ? responseTimesInSeconds.reduce((sum, time) => sum + time, 0) / responseTimesInSeconds.length 
+      : 0;
+
+    // Calculate average response time per user
+    const userAverageResponseTimes: Record<string, number> = {};
+    Object.entries(userResponseTimes).forEach(([user, times]) => {
+      userAverageResponseTimes[user] = times.reduce((sum, time) => sum + time, 0) / times.length;
+    });
+
+    // Calculate response time distribution
+    const responseTimeDistribution = [
+      { range: "0-10s", count: responseTimesInSeconds.filter(t => t <= 10).length },
+      { range: "10-30s", count: responseTimesInSeconds.filter(t => t > 10 && t <= 30).length },
+      { range: "30s-1m", count: responseTimesInSeconds.filter(t => t > 30 && t <= 60).length },
+      { range: "1-5m", count: responseTimesInSeconds.filter(t => t > 60 && t <= 300).length },
+      { range: "5-30m", count: responseTimesInSeconds.filter(t => t > 300 && t <= 1800).length },
+      { range: "30m-1h", count: responseTimesInSeconds.filter(t => t > 1800 && t <= 3600).length },
+      { range: "1h+", count: responseTimesInSeconds.filter(t => t > 3600).length },
+    ];
+
+    // Get fastest responders (users with at least 5 responses)
+    const fastestResponders = Object.entries(userResponseTimes)
+      .filter(([_, times]) => times.length >= 5)
+      .map(([user, times]) => ({
+        user,
+        averageTime: times.reduce((sum, time) => sum + time, 0) / times.length
+      }))
+      .sort((a, b) => a.averageTime - b.averageTime)
+      .slice(0, 5);
+
     return {
       totalMessages,
       totalWordCount,
@@ -648,6 +715,12 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       systemMessages,
       firstMessageDate: firstMessageDate || new Date().toISOString().split('T')[0],
       uniqueWordsPerUser,
+      responseTimeStats: {
+        averageResponseTime,
+        userResponseTimes: userAverageResponseTimes,
+        responseTimeDistribution,
+        fastestResponders
+      }
     }
   } catch (error) {
     console.error('Error in processWhatsAppChat:', error)

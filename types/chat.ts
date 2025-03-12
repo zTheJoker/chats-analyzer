@@ -87,5 +87,17 @@ export interface ChatData {
     average: number;
   }>;
   systemMessages: string[];
+  responseTimeStats?: {
+    averageResponseTime: number;
+    userResponseTimes: Record<string, number>;
+    responseTimeDistribution: Array<{
+      range: string;
+      count: number;
+    }>;
+    fastestResponders: Array<{
+      user: string;
+      averageTime: number;
+    }>;
+  };
 }
 

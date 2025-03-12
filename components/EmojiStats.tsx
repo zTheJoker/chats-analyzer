@@ -26,13 +26,27 @@ const EmojiStats: React.FC<EmojiStatsProps> = ({ emojiStats, userEmojiStats }) =
                 cy="50%"
                 outerRadius={80}
                 fill="#8884d8"
-                label
+                label={({ emoji, percent }) => `${emoji} (${(percent * 100).toFixed(0)}%)`}
               >
                 {emojiStats.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip
+                formatter={(value, name, props) => [value, `Count for ${props.payload.emoji}`]}
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-white p-2 border rounded shadow-sm">
+                        <p className="text-xl">{data.emoji}</p>
+                        <p className="text-sm font-medium">{data.count} times</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -40,12 +54,24 @@ const EmojiStats: React.FC<EmojiStatsProps> = ({ emojiStats, userEmojiStats }) =
           <h4 className="text-lg font-medium mb-2">Top Emoji Users</h4>
           <ul className="space-y-2">
             {userEmojiStats.slice(0, 5).map((user, index) => (
-              <li key={index} className="flex justify-between">
-                <span>{user.user}</span>
-                <span>{user.emojiCount} emojis</span>
+              <li key={index} className="flex justify-between p-2 bg-gray-50 rounded">
+                <span className="font-medium">{user.user}</span>
+                <span className="text-indigo-600 font-semibold">{user.emojiCount} emojis</span>
               </li>
             ))}
           </ul>
+          
+          <div className="mt-6">
+            <h4 className="text-lg font-medium mb-2">Most Popular Emojis</h4>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {emojiStats.slice(0, 10).map((emoji, index) => (
+                <div key={index} className="text-center">
+                  <div className="text-2xl mb-1">{emoji.emoji}</div>
+                  <div className="text-xs text-gray-600">{emoji.count}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

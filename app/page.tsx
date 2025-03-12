@@ -82,6 +82,9 @@ export default function Home() {
   const MainContent = () => (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16">
+        <div className="flex items-center justify-between mb-8">
+          <img src="/logo.png" alt="WhatsApp Analyzer Logo" className="h-10 md:h-16 w-auto" />
+        </div>
         <div className="max-w-4xl mx-auto">
           <h1 className="text-6xl md:text-6xl text-4xl font-bold mb-4 md:mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
             WhatsApp Chat Analyzer
@@ -148,6 +151,9 @@ export default function Home() {
           <footer className="mt-16 py-6 bg-gray-50 border-t border-gray-200">
             <div className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto text-sm text-gray-500">
+                <div className="flex flex-col items-center mb-4">
+                  <img src="/logo.png" alt="WhatsApp Analyzer Logo" className="h-10 w-auto mb-4" />
+                </div>
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                   <p>
                     For support: <a href="mailto:support@convoanalyzer.com" className="text-gray-600 hover:underline">support@convoanalyzer.com</a>
