@@ -8,11 +8,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { useRouter } from 'next/navigation'
 
 export function PremiumOfferPopup({ isResultsPage = false }) {
   const [isOpen, setIsOpen] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
     // Check if popup has been shown in this session
@@ -30,7 +28,7 @@ export function PremiumOfferPopup({ isResultsPage = false }) {
 
   const handleGetStarted = () => {
     setIsOpen(false)
-    router.push('/login')
+    window.open('mailto:support@convoanalyzer.com?subject=Premium%20Access%20Request', '_blank')
   }
 
   return (
