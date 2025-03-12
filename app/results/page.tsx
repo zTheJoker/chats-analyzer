@@ -123,12 +123,17 @@ export default function Results() {
               </AlertDescription>
             </Alert>
 
-            <div className="w-full text-center text-sm text-gray-400 py-4">
-              <a href="/terms" className="hover:text-gray-600">Terms</a>
-              {' · '}
-              <a href="/privacy" className="hover:text-gray-600">Privacy</a>
-              {' · '}
-              <a href="mailto:support@convoanalyzer.com" className="hover:text-gray-600">Support</a>
+            <div className="w-full flex flex-col items-center text-center text-sm text-gray-400 py-4">
+              <div className="mb-4">
+                <img src="/logo.svg" alt="WhatsApp Analyzer Logo" className="h-10 w-auto" />
+              </div>
+              <div>
+                <a href="/terms" className="hover:text-gray-600">Terms</a>
+                {' · '}
+                <a href="/privacy" className="hover:text-gray-600">Privacy</a>
+                {' · '}
+                <a href="mailto:support@convoanalyzer.com" className="hover:text-gray-600">Support</a>
+              </div>
             </div>
           </div>
         </div>

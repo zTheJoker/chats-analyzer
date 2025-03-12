@@ -105,11 +105,17 @@ export interface ChatData {
 }
 
 const MESSAGE_PATTERNS = [
-  // Standard format with RTL support: [date], [time] - [user]: [message]
+  // Standard WhatsApp format with RTL support: [date], [time] - [user]: [message]
   /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*[-–]\s*(.*?):\s*(.+)$/,
   
-  // Alternative format with optional brackets: [date] [time] [user]: [message]
+  // WhatsApp format with optional brackets: [date] [time] [user]: [message]
   /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*(.*?):\s*(.+)$/,
+  
+  // WhatsApp format with date/time without brackets: MM/DD/YY, HH:MM - User: Message
+  /^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s*(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*(.*?):\s*(.+)$/,
+  
+  // Hebrew/RTL format with square brackets: [DD/MM/YYYY, HH:MM:SS] User: Message
+  /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),\s*(\d{1,2}:\d{2}(?::\d{2})?)\]\s*(.*?):\s*(.+)$/,
   
   // System message format: [date], [time] - [message]
   /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*[-–]?\s*(.+)$/
@@ -117,39 +123,72 @@ const MESSAGE_PATTERNS = [
 
 function parseDate(dateString: string): Date | null {
   // Clean up the date string
-  const cleanDate = dateString.trim().replace(/[,]/g, '');
+  const cleanDate = dateString.trim().replace(/[,\[\]]/g, '');
   
   // Define all possible date formats
   const formats = [
-    'M/d/yy', 'M/d/yyyy', 'd/M/yy', 'd/M/yyyy',
-    'MM/dd/yy', 'MM/dd/yyyy', 'dd/MM/yy', 'dd/MM/yyyy',
-    'M-d-yy', 'M-d-yyyy', 'd-M-yy', 'd-M-yyyy',
-    'MM-dd-yy', 'MM-dd-yyyy', 'dd-MM-yy', 'dd-MM-yyyy',
-    'M.d.yy', 'M.d.yyyy', 'd.M.yy', 'd.M.yyyy',
-    'MM.dd.yy', 'MM.dd.yyyy', 'dd.MM.yy', 'dd.MM.yyyy',
+    // US formats (month first)
+    'M/d/yy', 'M/d/yyyy', 'MM/dd/yy', 'MM/dd/yyyy',
+    'M-d-yy', 'M-d-yyyy', 'MM-dd-yy', 'MM-dd-yyyy',
+    'M.d.yy', 'M.d.yyyy', 'MM.dd.yy', 'MM.dd.yyyy',
+    
+    // European/International formats (day first)
+    'd/M/yy', 'd/M/yyyy', 'dd/MM/yy', 'dd/MM/yyyy',
+    'd-M-yy', 'd-M-yyyy', 'dd-MM-yy', 'dd-MM-yyyy',
+    'd.M.yy', 'd.M.yyyy', 'dd.MM.yy', 'dd.MM.yyyy',
+    
+    // ISO formats (year first)
     'yyyy/MM/dd', 'yy/MM/dd', 'yyyy-MM-dd', 'yy-MM-dd',
-    'yyyy.MM.dd', 'yy.MM.dd'
+    'yyyy.MM.dd', 'yy.MM.dd',
+    
+    // Additional formats for different locales
+    'yyyy/d/M', 'yy/d/M', 'yyyy/dd/MM', 'yy/dd/MM',
+    'd/MMM/yyyy', 'dd/MMM/yyyy', 'd/MMM/yy', 'dd/MMM/yy',
+    'MMM/d/yyyy', 'MMM/dd/yyyy', 'MMM/d/yy', 'MMM/dd/yy'
   ];
 
   let parsedDate: Date | null = null;
 
-  for (const dateFormat of formats) {
-    try {
-      const attemptedDate = parse(cleanDate, dateFormat, new Date());
-      if (isValid(attemptedDate)) {
-        // Handle two-digit years
-        if (dateFormat.includes('yy') && !dateFormat.includes('yyyy')) {
-          const year = attemptedDate.getFullYear();
-          // If the year is in the future, subtract 100 years
-          if (year > new Date().getFullYear() + 1) {
-            attemptedDate.setFullYear(year - 100);
+  // First, check if we have a numeric format before attempting parsing
+  // This helps avoid unnecessary parsing attempts
+  const isNumericDate = /^\d{1,4}[-./]\d{1,2}[-./]\d{1,4}$/.test(cleanDate);
+  
+  if (isNumericDate) {
+    for (const dateFormat of formats) {
+      try {
+        const attemptedDate = parse(cleanDate, dateFormat, new Date());
+        if (isValid(attemptedDate)) {
+          // Handle two-digit years
+          if (dateFormat.includes('yy') && !dateFormat.includes('yyyy')) {
+            const year = attemptedDate.getFullYear();
+            // If the year is in the future, subtract 100 years
+            if (year > new Date().getFullYear() + 1) {
+              attemptedDate.setFullYear(year - 100);
+            }
+          }
+          
+          // Validate that the date is reasonable (not in the far future)
+          if (attemptedDate.getFullYear() <= new Date().getFullYear() + 1) {
+            parsedDate = attemptedDate;
+            break;
           }
         }
-        parsedDate = attemptedDate;
-        break;
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  // If we couldn't parse the date, try to handle special cases
+  if (!parsedDate) {
+    try {
+      // Try to parse as a JavaScript Date object directly
+      const directDate = new Date(cleanDate);
+      if (isValid(directDate) && directDate.getFullYear() > 1970) {
+        parsedDate = directDate;
       }
     } catch {
-      continue;
+      // Ignore errors from direct parsing
     }
   }
 
@@ -181,20 +220,30 @@ function isValidWord(word: string): boolean {
   )
 }
 
-function processWords(message: string, user: string) {
-  const words = message
-    .split(/[\s!?.,:;()\[\]{}'"]+/)
+function processWords(message: string, user: string): number {
+  // Normalize text to handle unicode variations
+  const normalizedMessage = message.normalize('NFD');
+  
+  // Handle URLs as single words
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const withoutUrls = normalizedMessage.replace(urlRegex, ' URL ');
+  
+  // Split by various delimiters while preserving words from different scripts
+  // This pattern works better for languages like Hebrew, Arabic, Chinese, etc.
+  const words = withoutUrls
+    .split(/[\s!?.,:;()\[\]{}'"،、。？！।॥「」『』【】〖〗《》]+/)
     .filter(word => {
       const cleanWord = word.toLowerCase().trim()
       return (
-        cleanWord.length > 2 && 
+        cleanWord.length > 1 && // At least 2 characters
         !WHATSAPP_SYSTEM_WORDS.has(cleanWord) &&
-        !/^\d+$/.test(cleanWord) &&
-        !/^[!@#$%^&*(),.?":{}|<>]+$/.test(cleanWord)
+        !/^\d+$/.test(cleanWord) && // Not just numbers
+        !/^[!@#$%^&*(),.?":{}|<>]+$/.test(cleanWord) && // Not just punctuation
+        cleanWord !== 'URL' // Filter out our URL placeholder
       )
-    })
+    });
 
-  return words.length
+  return words.length;
 }
 
 export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
@@ -268,12 +317,25 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
         }
       }
 
-      // Special handling for system messages and media
+      // Special handling for system messages and media across different languages
       if (message) {
-        const mediaPattern = /<?(Media|image|video|audio|sticker) omitted>?/i
-        const deletedPattern = /(?:This message was deleted|You deleted this message)/i
+        // Media patterns in multiple languages (English, Hebrew, Spanish, etc.)
+        const mediaPattern = /<?(Media|image|video|audio|sticker|gif|document|contact|location|live|תמונה|סרטון|הודעה קולית|מדיה|imagen|video|audio|sticker|documento) omitted>?/i
         
-        if (mediaPattern.test(message) || deletedPattern.test(message)) {
+        // Deleted message patterns in multiple languages
+        const deletedPattern = /(?:This message was deleted|You deleted this message|הודעה זו נמחקה|ההודעה נמחקה|Este mensaje fue eliminado|Has eliminado este mensaje|Message supprimé|Du hast diese Nachricht gelöscht)/i
+        
+        // Missing media patterns
+        const missingMediaPattern = /(Media not included|Media not available|Failed to load|Failed to download)/i
+        
+        // Poll, contacts, locations patterns
+        const specialContentPattern = /(Poll:|Live location|Location:|Contact card|Contact:|Poll message)/i
+        
+        if (mediaPattern.test(message) || 
+            deletedPattern.test(message) || 
+            missingMediaPattern.test(message) ||
+            specialContentPattern.test(message) ||
+            message.includes('omitted')) {
           isSystemMessage = true
         }
       }
@@ -298,10 +360,10 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
         continue
       }
 
-      // Parse the date
-      const parsedDate = parse(date, 'dd/MM/yyyy', new Date())
-      if (!isValid(parsedDate)) {
-        console.warn(`Skipping invalid line ${i + 1}: Invalid date format`)
+      // Parse the date using our enhanced parser
+      const parsedDate = parseDate(date)
+      if (!parsedDate || !isValid(parsedDate)) {
+        console.warn(`Skipping invalid line ${i + 1}: Invalid date format '${date}'`)
         skippedLines++
         continue
       }
@@ -340,25 +402,47 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       const hour = parseInt(time.split(':')[0], 10)
       messagesByHour[hour]++
 
-      // Process words for both frequency and uniqueness
-      const messageWords = message
-        .split(/[\s!?.,:;()\[\]{}'"]+/) // Split on more punctuation
-        .filter(isValidWord)
-      messageWords.forEach((word) => {
-        const cleanWord = word.toLowerCase().replace(/[^\w\s]/g, '')
-        if (cleanWord && !WHATSAPP_SYSTEM_WORDS.has(cleanWord) && (isNaN(Number(cleanWord)) || isNonLatinChar(cleanWord[0]))) {
-          // Update word frequency
-          wordFrequency[cleanWord] = (wordFrequency[cleanWord] || 0) + 1
-          userStats[user].wordCount++
+      // Process words for frequency using our improved method
+      if (!isSystemMessage && user && message) {
+        const wordCount = processWords(message, user)
+        
+        // Process words for both frequency and uniqueness
+        const normalizedMessage = message.normalize('NFD');
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const withoutUrls = normalizedMessage.replace(urlRegex, ' URL ');
+        
+        const messageWords = withoutUrls
+          .split(/[\s!?.,:;()\[\]{}'"،、。？！।॥「」『』【】〖〗《》]+/)
+          .filter(word => {
+            const cleanWord = word.toLowerCase().trim()
+            return (
+              cleanWord.length > 1 &&
+              !WHATSAPP_SYSTEM_WORDS.has(cleanWord) &&
+              !/^\d+$/.test(cleanWord) &&
+              !/^[!@#$%^&*(),.?":{}|<>]+$/.test(cleanWord) &&
+              cleanWord !== 'URL'
+            )
+          })
           
-          // Update unique words for user
-          if (!uniqueWordsPerUser[user]) {
-            uniqueWordsPerUser[user] = new Set()
+        messageWords.forEach((word) => {
+          const cleanWord = word.toLowerCase().replace(/[^\w\s]/g, '')
+          if (cleanWord && !WHATSAPP_SYSTEM_WORDS.has(cleanWord) && 
+              (isNaN(Number(cleanWord)) || isNonLatinChar(cleanWord[0]))) {
+            // Update word frequency
+            wordFrequency[cleanWord] = (wordFrequency[cleanWord] || 0) + 1
+            
+            // Update unique words for user
+            if (!uniqueWordsPerUser[user]) {
+              uniqueWordsPerUser[user] = new Set()
+            }
+            uniqueWordsPerUser[user].add(cleanWord)
           }
-          uniqueWordsPerUser[user].add(cleanWord)
-          totalWordCount++
-        }
-      })
+        })
+        
+        // Update user stats with the word count from our specialized function
+        userStats[user].wordCount += wordCount
+        totalWordCount += wordCount
+      }
 
       const weekday = getWeekday(normalizedDate)
       weekdayMessageCounts[weekday] = (weekdayMessageCounts[weekday] || 0) + 1
@@ -405,26 +489,7 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
         firstMessageDate = normalizedDate
       }
 
-      // Initialize unique words set for user if not exists
-      if (!uniqueWordsPerUser[user]) {
-        uniqueWordsPerUser[user] = new Set()
-      }
-
-      // Process words for uniqueness
-      const words = message.split(/\s+/)
-      words.forEach((word) => {
-        const cleanWord = word.toLowerCase().replace(/[^\w\s]/g, '')
-        if (cleanWord && !WHATSAPP_SYSTEM_WORDS.has(cleanWord) && (isNaN(Number(cleanWord)) || isNonLatinChar(cleanWord[0]))) {
-          uniqueWordsPerUser[user].add(cleanWord)
-          totalWordCount++
-        }
-      })
-
-      if (!isSystemMessage && user && message) {
-        const wordCount = processWords(message, user)
-        userStats[user].wordCount += wordCount
-        totalWordCount += wordCount
-      }
+      // Word processing is now handled earlier in a more accurate way
     }
 
     // Ensure safe calculations

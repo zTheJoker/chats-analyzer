@@ -12,18 +12,10 @@ import { Button } from "@/components/ui/button"
 export function PremiumOfferPopup({ isResultsPage = false }) {
   const [isOpen, setIsOpen] = useState(false)
 
+  // Temporarily disabled premium popup
   useEffect(() => {
-    // Check if popup has been shown in this session
-    const hasBeenShown = localStorage.getItem('premiumPopupShown')
-    
-    if (!hasBeenShown) {
-      const timer = setTimeout(() => {
-        setIsOpen(true)
-        localStorage.setItem('premiumPopupShown', 'true')
-      }, isResultsPage ? 5000 : 20000) // Show after 5 seconds on results page, 20 seconds on home
-
-      return () => clearTimeout(timer)
-    }
+    // No action - premium popup is disabled
+    localStorage.setItem('premiumPopupShown', 'true')
   }, [isResultsPage])
 
   const handleGetStarted = () => {

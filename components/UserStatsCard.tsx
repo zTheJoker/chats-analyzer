@@ -12,7 +12,10 @@ interface UserStatsCardProps {
 
 const UserStatsCard: React.FC<UserStatsCardProps> = ({ user, stats, uniqueWords, totalMessages, rank }) => {
   const messagePercentage = ((stats.messageCount / totalMessages) * 100).toFixed(1)
-  const averageWordsPerMessage = (stats.wordCount / stats.messageCount).toFixed(1)
+  // Ensure wordCount and messageCount are valid numbers to avoid NaN
+  const averageWordsPerMessage = stats.messageCount > 0 
+    ? (stats.wordCount / stats.messageCount).toFixed(1) 
+    : '0.0'
 
   return (
     <Card className="hover:shadow-lg transition-shadow relative">
