@@ -40,7 +40,7 @@ const UserStatsCard: React.FC<UserStatsCardProps> = ({ user, stats, uniqueWords,
           </div>
           <div>
             <p className="text-sm text-gray-600">Unique Words Used</p>
-            <p className="text-2xl font-semibold">{uniqueWords.size.toLocaleString()}</p>
+            <p className="text-2xl font-semibold">{uniqueWords?.size?.toLocaleString() || '0'}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Avg Words/Message</p>

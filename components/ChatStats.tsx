@@ -200,13 +200,14 @@ const ChatStats: React.FC<ChatStatsProps> = ({ chatData }) => {
           {Object.entries(chatData.userStats)
             .sort(([, a], [, b]) => b.messageCount - a.messageCount)
             .slice(0, showAllUsers ? undefined : 3)
-            .map(([user, stats]) => (
+            .map(([user, stats], index) => (
               <UserStatsCard
                 key={user}
                 user={user}
                 stats={stats}
-                uniqueWords={chatData.uniqueWordsPerUser[user]}
+                uniqueWords={chatData.uniqueWordsPerUser?.[user] || new Set()}
                 totalMessages={chatData.totalMessages}
+                rank={index + 1}
               />
             ))}
         </div>
