@@ -7,6 +7,7 @@ import { ChatData } from '@/types/chat'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Info } from 'lucide-react'
 import { PremiumOfferPopup } from '@/components/PremiumOfferPopup'
+import { WelcomeStatsPopup } from '@/components/WelcomeStatsPopup'
 import { dbService } from '@/utils/storage'
 
 // Dynamically import components with ssr disabled
@@ -27,6 +28,7 @@ const DownloadPDF = dynamic(() => import('@/components/DownloadPDF'), { ssr: fal
 export default function Results() {
   const [chatData, setChatData] = useState<ChatData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [showWelcomeStats, setShowWelcomeStats] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -51,6 +53,13 @@ export default function Results() {
         const data = await dbService.retrieve('currentChat')
         if (data) {
           setChatData(data)
+          
+          // Show welcome stats popup if user hasn't seen it before
+          if (!localStorage.getItem('welcomeStatsShown')) {
+            // Add small delay to ensure data is loaded and rendered
+            setTimeout(() => setShowWelcomeStats(true), 500)
+            localStorage.setItem('welcomeStatsShown', 'true')
+          }
         } else {
           setError('No chat data found. Please upload a chat file first.')
           setTimeout(() => router.push('/'), 3000)
@@ -92,6 +101,11 @@ export default function Results() {
   return (
     <main className="min-h-screen bg-gray-50">
       <PremiumOfferPopup isResultsPage={true} />
+      <WelcomeStatsPopup 
+        chatData={chatData} 
+        isOpen={showWelcomeStats} 
+        onOpenChange={setShowWelcomeStats} 
+      />
       <div className="container mx-auto px-4 py-6 md:py-12">
         <div className="flex items-center justify-between mb-8">
           <img src="/logo.png" alt="WhatsApp Analyzer Logo" className="h-10 md:h-16 w-auto" />

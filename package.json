@@ -45,6 +45,7 @@
     "date-fns": "latest",
     "embla-carousel-react": "8.5.1",
     "emoji-regex": "latest",
+    "framer-motion": "^11.0.23",
     "html2pdf.js": "^0.10.2",
     "input-otp": "1.4.1",
     "jszip": "^3.10.1",
