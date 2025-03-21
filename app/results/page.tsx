@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Info } from 'lucide-react'
 import { PremiumOfferPopup } from '@/components/PremiumOfferPopup'
 import { WelcomeStatsPopup } from '@/components/WelcomeStatsPopup'
+import { SupportPopup } from '@/components/SupportPopup'
 import { dbService } from '@/utils/storage'
 
 // Dynamically import components with ssr disabled
@@ -106,6 +107,7 @@ export default function Results() {
         isOpen={showWelcomeStats} 
         onOpenChange={setShowWelcomeStats} 
       />
+      <SupportPopup trigger="scroll" />
       <div className="container mx-auto px-4 py-6 md:py-12">
         <div className="flex items-center justify-between mb-8">
           <img src="/logo.png" alt="WhatsApp Analyzer Logo" className="h-10 md:h-16 w-auto" />

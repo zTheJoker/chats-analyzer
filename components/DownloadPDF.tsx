@@ -4,9 +4,11 @@ import { Download } from 'lucide-react'
 import { Button } from './ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { SupportPopup } from './SupportPopup'
 
 const DownloadPDF: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false)
+  const [showSupportPopup, setShowSupportPopup] = useState(false)
   const { toast } = useToast()
   const isMobile = useIsMobile()
 
@@ -124,6 +126,9 @@ const DownloadPDF: React.FC = () => {
         description: "Your report has been downloaded.",
         duration: 3000,
       })
+      
+      // Show support popup after successful download
+      setShowSupportPopup(true)
     } catch (error) {
       console.error('Error generating PDF:', error)
       toast({
@@ -137,15 +142,23 @@ const DownloadPDF: React.FC = () => {
   }
 
   return (
-    <Button
-      onClick={handleDownload}
-      disabled={isGenerating}
-      className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white
-        ${isMobile ? 'w-full justify-center py-6 text-lg' : ''}`}
-    >
-      <Download className={`${isMobile ? 'w-6 h-6' : 'w-4 h-4'}`} />
-      {isGenerating ? 'Generating PDF...' : 'Download Report'}
-    </Button>
+    <>
+      <Button
+        onClick={handleDownload}
+        disabled={isGenerating}
+        className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white
+          ${isMobile ? 'w-full justify-center py-6 text-lg' : ''}`}
+      >
+        <Download className={`${isMobile ? 'w-6 h-6' : 'w-4 h-4'}`} />
+        {isGenerating ? 'Generating PDF...' : 'Download Report'}
+      </Button>
+      
+      <SupportPopup 
+        trigger="download" 
+        isOpen={showSupportPopup} 
+        onOpenChange={setShowSupportPopup} 
+      />
+    </>
   )
 }
 
