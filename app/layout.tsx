@@ -66,9 +66,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://convoanalyzer.com'
   },
-  verification: {
-    google: 'your-google-site-verification', // Add your Google verification code if you have one
-  }
 }
 
 export default function RootLayout({
