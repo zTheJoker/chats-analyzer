@@ -34,9 +34,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: '/logo.svg',
-    shortcut: '/logo.svg',
-    apple: '/logo.svg',
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/logo-192x192.png',
   },
   openGraph: {
     type: 'website',
@@ -46,9 +46,9 @@ export const metadata: Metadata = {
     description: 'Analyze your WhatsApp chats instantly. Get message patterns, emoji stats, and chat insights. 100% private - your data never leaves your device.',
     siteName: 'WhatsApp Chat Analyzer',
     images: [{
-      url: '/logo.svg',
-      width: 1200,
-      height: 630,
+      url: '/logo-512x512.png',
+      width: 512,
+      height: 512,
       alt: 'WhatsApp Chat Analyzer Logo'
     }],
   },
@@ -57,7 +57,9 @@ export const metadata: Metadata = {
     title: 'WhatsApp Chat Analyzer - Free Online Chat Analysis Tool',
     description: 'Analyze your WhatsApp chats instantly. Get message patterns, emoji stats, and chat insights. 100% private - your data never leaves your device.',
     images: [{
-      url: '/logo.svg',
+      url: '/logo-512x512.png',
+      width: 512,
+      height: 512,
       alt: 'WhatsApp Chat Analyzer Logo'
     }],
   },

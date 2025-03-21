@@ -11,10 +11,26 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#000000',
     icons: [
       {
-        src: '/logo.svg',
-        sizes: 'any',
-        type: 'image/svg+xml',
-        purpose: 'any maskable'
+        src: '/favicon.ico',
+        sizes: '32x32',
+        type: 'image/x-icon'
+      },
+      {
+        src: '/logo-96x96.png',
+        sizes: '96x96',
+        type: 'image/png'
+      },
+      {
+        src: '/logo-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'any'
+      },
+      {
+        src: '/logo-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any'
       }
     ],
     categories: ['tools', 'utilities', 'social'],
