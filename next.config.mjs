@@ -21,6 +21,14 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/sitemap.xml',
+        destination: '/app/sitemap.xml',
+      },
+    ]
+  },
 }
 
 mergeConfig(nextConfig, userConfig)
