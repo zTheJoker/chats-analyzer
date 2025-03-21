@@ -83,14 +83,19 @@ export default function Home() {
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16">
         <div className="flex items-center justify-between mb-8">
-          <img src="/logo.png" alt="WhatsApp Analyzer Logo" className="h-10 md:h-16 w-auto" />
+          <img src="/logo.png" alt="WhatsApp Chat Analyzer Logo" className="h-10 md:h-16 w-auto" />
+          <div className="hidden md:flex space-x-4 text-gray-600">
+            <a href="/export" className="hover:text-blue-600 hover:underline">How to Export</a>
+            <a href="/privacy" className="hover:text-blue-600 hover:underline">Privacy</a>
+            <a href="/terms" className="hover:text-blue-600 hover:underline">Terms</a>
+          </div>
         </div>
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-6xl md:text-6xl text-4xl font-bold mb-4 md:mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
-            WhatsApp Chat Analyzer
+          <h1 className="text-5xl md:text-6xl text-4xl font-bold mb-4 md:mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+            WhatsApp Chat Analyzer - Best Free Online Chat Analysis Tool
           </h1>
           <p className="text-xl md:text-2xl text-center text-gray-600 mb-8 md:mb-12">
-            Unlock insights from your conversations with our powerful, private, and secure analyzer.
+            Analyze your WhatsApp chat history with our powerful, free, and 100% private analyzer. Get message statistics, emoji usage, and conversation insights without sending your data to any server.
           </p>
           
           <div className="bg-white p-6 md:p-8 rounded-3xl shadow-2xl mb-12 md:mt-16">
@@ -131,39 +136,88 @@ export default function Home() {
           <Benefits />
 
           <div className="mt-16 text-center">
-            <h3 className="text-2xl font-semibold mb-4">How It Works</h3>
+            <h2 className="text-3xl font-semibold mb-6">How to Analyze Your WhatsApp Chat</h2>
             <ol className="text-left inline-block">
-              <li className="flex items-center mb-4">
+              <li className="flex items-center mb-6">
                 <span className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4">1</span>
-                Export your WhatsApp chat
+                <span className="text-lg">Export your WhatsApp chat from the app (Media not included)</span>
               </li>
-              <li className="flex items-center mb-4">
+              <li className="flex items-center mb-6">
                 <span className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4">2</span>
-                Upload the .txt file
+                <span className="text-lg">Upload the .txt file to our secure analyzer</span>
               </li>
-              <li className="flex items-center mb-4">
+              <li className="flex items-center mb-6">
                 <span className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4">3</span>
-                Get instant insights
+                <span className="text-lg">Get instant insights about your conversations</span>
               </li>
             </ol>
+            <p className="mt-4 text-gray-600">Your data stays on your device. We never store or transmit your conversations.</p>
           </div>
+          
+          <section className="mt-16 bg-gray-50 p-6 rounded-lg">
+            <h2 className="text-3xl font-semibold mb-6 text-center">Why Choose Our WhatsApp Analyzer?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white p-4 rounded shadow">
+                <h3 className="font-semibold text-xl mb-2">100% Private & Secure</h3>
+                <p>All analysis happens directly in your browser. Your chat data never leaves your device.</p>
+              </div>
+              <div className="bg-white p-4 rounded shadow">
+                <h3 className="font-semibold text-xl mb-2">Comprehensive Stats</h3>
+                <p>Message counts, response times, emoji usage, conversation patterns, and more.</p>
+              </div>
+              <div className="bg-white p-4 rounded shadow">
+                <h3 className="font-semibold text-xl mb-2">Fast & Free</h3>
+                <p>Instant analysis with no registration required. Completely free to use.</p>
+              </div>
+              <div className="bg-white p-4 rounded shadow">
+                <h3 className="font-semibold text-xl mb-2">Works Offline</h3>
+                <p>Once loaded, our analyzer works without internet connection for maximum privacy.</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="mt-16 p-6">
+            <h2 className="text-3xl font-semibold mb-6 text-center">Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              <div className="bg-white p-4 rounded shadow">
+                <h3 className="font-semibold text-xl mb-2">Is the WhatsApp Chat Analyzer really free?</h3>
+                <p>Yes, our WhatsApp Chat Analyzer is completely free to use with no hidden fees or registration required.</p>
+              </div>
+              <div className="bg-white p-4 rounded shadow">
+                <h3 className="font-semibold text-xl mb-2">Is my chat data safe?</h3>
+                <p>Absolutely! All processing happens directly in your browser. Your chat data never leaves your device or gets uploaded to any server.</p>
+              </div>
+              <div className="bg-white p-4 rounded shadow">
+                <h3 className="font-semibold text-xl mb-2">What kind of insights will I get?</h3>
+                <p>Our analyzer provides detailed statistics about message counts, response times, emoji usage, conversation patterns, chat activity by day/time, and much more.</p>
+              </div>
+              <div className="bg-white p-4 rounded shadow">
+                <h3 className="font-semibold text-xl mb-2">Can I analyze group chats?</h3>
+                <p>Yes, our tool works perfectly with both individual and group WhatsApp chats.</p>
+              </div>
+            </div>
+          </section>
 
           <footer className="mt-16 py-6 bg-gray-50 border-t border-gray-200">
             <div className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto text-sm text-gray-500">
                 <div className="flex flex-col items-center mb-4">
-                  <img src="/logo.png" alt="WhatsApp Analyzer Logo" className="h-10 w-auto mb-4" />
+                  <img src="/logo.png" alt="WhatsApp Chat Analyzer Logo" className="h-10 w-auto mb-4" />
+                  <p className="text-center mb-4">The fastest and most private WhatsApp chat analyzer available online. No registration required.</p>
                 </div>
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                   <p>
                     For support: <a href="mailto:support@convoanalyzer.com" className="text-gray-600 hover:underline">support@convoanalyzer.com</a>
                   </p>
                   <p>
-                    <a href="/terms" className="text-gray-600 hover:underline">Terms</a>
+                    <a href="/terms" className="text-gray-600 hover:underline">Terms of Service</a>
                     {' · '}
-                    <a href="/privacy" className="text-gray-600 hover:underline">Privacy</a>
+                    <a href="/privacy" className="text-gray-600 hover:underline">Privacy Policy</a>
+                    {' · '}
+                    <a href="/export" className="text-gray-600 hover:underline">How to Export</a>
                   </p>
                 </div>
+                <p className="text-center mt-4">© {new Date().getFullYear()} WhatsApp Chat Analyzer. All rights reserved.</p>
               </div>
             </div>
           </footer>
@@ -186,7 +240,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-24">
       <PremiumOfferPopup />
       <MainContent />
     </main>
