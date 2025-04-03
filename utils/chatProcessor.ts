@@ -609,7 +609,9 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       if (prevDateTime && currDateTime) {
         const diffHours = (currDateTime.getTime() - prevDateTime.getTime()) / (1000 * 60 * 60)
 
-        if (diffHours >= 6) {
+        // Only consider gaps between consecutive messages that are from different points in time
+        // This prevents counting the full chat duration as an inactivity period
+        if (diffHours >= 6 && diffHours < 8760) { // 8760 hours = 1 year (to filter out extremely long periods)
           inactivityPeriods.push({
             start: `${prevMessage.date} ${prevMessage.time}`,
             end: `${currMessage.date} ${currMessage.time}`,
