@@ -17,69 +17,109 @@ const ConversationStarters: React.FC<ConversationStartersProps> = ({ data }) => 
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
 
+  // Get max count for percentage calculations
+  const maxStarterCount = sortedFirstMessage.length > 0 ? sortedFirstMessage[0][1] : 0
+  const maxCloserCount = sortedLastMessage.length > 0 ? sortedLastMessage[0][1] : 0
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <h3 className="text-2xl font-semibold mb-4">Conversation Starters and Closers</h3>
+      <h3 className="text-2xl font-semibold mb-6">Conversation Starters and Closers</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Conversation Starters */}
-        <div className="border rounded-lg overflow-hidden">
-          <div className="bg-[#075e54] text-white p-3 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" />
-            <h4 className="font-medium">Top Conversation Starters</h4>
+        <div>
+          <div className="flex items-center mb-4 gap-2">
+            <div className="bg-blue-100 p-2 rounded-lg">
+              <ArrowUp className="w-5 h-5 text-blue-600" />
+            </div>
+            <h4 className="text-xl font-medium text-gray-800">Top Conversation Starters</h4>
           </div>
           
-          <div className="bg-[#e5ddd5] p-4 bg-[url('/whatsapp-bg.png')] bg-repeat">
-            <ul className="space-y-3">
-              {sortedFirstMessage.map(([user, count], index) => (
-                <li key={index} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white flex-shrink-0">
-                    {user.charAt(0)}
-                  </div>
-                  <div className="bg-white rounded-lg p-3 shadow-sm flex-1">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-medium text-blue-700">{user}</span>
-                      <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
-                        <ArrowUp className="w-3 h-3" />
-                        <span>{count} times</span>
+          <ul className="space-y-4">
+            {sortedFirstMessage.map(([user, count], index) => {
+              const percentOfMax = Math.round((count / maxStarterCount) * 100)
+              const initial = user.charAt(0)
+              
+              return (
+                <li key={index} className="relative">
+                  <div className="flex items-center gap-4">
+                    {/* Avatar */}
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold text-lg">
+                      {initial}
+                    </div>
+                    
+                    {/* User info and stats */}
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-medium text-gray-800">{user}</span>
+                        <span className="text-blue-600 font-bold">{count} times</span>
+                      </div>
+                      
+                      {/* Progress bar */}
+                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-blue-500 rounded-full" 
+                          style={{ width: `${percentOfMax}%` }}
+                        />
+                      </div>
+                      
+                      <div className="text-xs text-gray-500 mt-1">
+                        Initiates conversations frequently
                       </div>
                     </div>
-                    <div className="text-xs text-gray-500">Initiates conversations frequently</div>
                   </div>
                 </li>
-              ))}
-            </ul>
-          </div>
+              )
+            })}
+          </ul>
         </div>
         
         {/* Conversation Closers */}
-        <div className="border rounded-lg overflow-hidden">
-          <div className="bg-[#075e54] text-white p-3 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" />
-            <h4 className="font-medium">Top Conversation Closers</h4>
+        <div>
+          <div className="flex items-center mb-4 gap-2">
+            <div className="bg-orange-100 p-2 rounded-lg">
+              <ArrowDown className="w-5 h-5 text-orange-600" />
+            </div>
+            <h4 className="text-xl font-medium text-gray-800">Top Conversation Closers</h4>
           </div>
           
-          <div className="bg-[#e5ddd5] p-4 bg-[url('/whatsapp-bg.png')] bg-repeat">
-            <ul className="space-y-3">
-              {sortedLastMessage.map(([user, count], index) => (
-                <li key={index} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-600 flex items-center justify-center text-white flex-shrink-0">
-                    {user.charAt(0)}
-                  </div>
-                  <div className="bg-white rounded-lg p-3 shadow-sm flex-1">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-medium text-red-700">{user}</span>
-                      <div className="flex items-center gap-1 text-xs text-red-600 font-medium">
-                        <ArrowDown className="w-3 h-3" />
-                        <span>{count} times</span>
+          <ul className="space-y-4">
+            {sortedLastMessage.map(([user, count], index) => {
+              const percentOfMax = Math.round((count / maxCloserCount) * 100)
+              const initial = user.charAt(0)
+              
+              return (
+                <li key={index} className="relative">
+                  <div className="flex items-center gap-4">
+                    {/* Avatar */}
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-semibold text-lg">
+                      {initial}
+                    </div>
+                    
+                    {/* User info and stats */}
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-medium text-gray-800">{user}</span>
+                        <span className="text-orange-600 font-bold">{count} times</span>
+                      </div>
+                      
+                      {/* Progress bar */}
+                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-orange-500 rounded-full" 
+                          style={{ width: `${percentOfMax}%` }}
+                        />
+                      </div>
+                      
+                      <div className="text-xs text-gray-500 mt-1">
+                        Usually has the last word
                       </div>
                     </div>
-                    <div className="text-xs text-gray-500">Usually has the last word</div>
                   </div>
                 </li>
-              ))}
-            </ul>
-          </div>
+              )
+            })}
+          </ul>
         </div>
       </div>
     </div>
