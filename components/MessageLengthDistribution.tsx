@@ -16,7 +16,7 @@ const MessageLengthDistribution: React.FC<MessageLengthDistributionProps> = ({ d
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="count" name="Number of Messages" fill="#8884d8" />
+          <Bar dataKey="count" name="Message Count" fill="#8884d8" />
         </BarChart>
       </ResponsiveContainer>
     </div>
