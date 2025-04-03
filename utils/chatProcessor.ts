@@ -258,6 +258,37 @@ function processWords(message: string, user: string): number {
   return words.length;
 }
 
+function parseDateTime(dateStr: string, timeStr: string): Date | null {
+  try {
+    // First try using our existing robust parseDate function
+    const parsedDate = parseDate(dateStr);
+    
+    if (!parsedDate) {
+      console.warn('Could not parse date:', dateStr);
+      return null;
+    }
+    
+    // Parse the time component
+    const timeParts = timeStr.split(':').map(part => parseInt(part, 10));
+    if (timeParts.length < 2 || timeParts.some(isNaN)) {
+      console.warn('Invalid time format:', timeStr);
+      return null;
+    }
+    
+    const hours = timeParts[0];
+    const minutes = timeParts[1];
+    const seconds = timeParts.length > 2 ? timeParts[2] : 0;
+    
+    // Set the time on our parsed date
+    parsedDate.setHours(hours, minutes, seconds);
+    
+    return parsedDate;
+  } catch (error) {
+    console.error('Error parsing date/time:', error);
+    return null;
+  }
+}
+
 export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
   try {
     if (!chatText || typeof chatText !== 'string') {
@@ -571,16 +602,20 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
     for (let i = 1; i < messages.length; i++) {
       const prevMessage = messages[i - 1]
       const currMessage = messages[i]
-      const prevDateTime = parse(`${prevMessage.date} ${prevMessage.time}`, 'dd/MM/yyyy HH:mm:ss', new Date())
-      const currDateTime = parse(`${currMessage.date} ${currMessage.time}`, 'dd/MM/yyyy HH:mm:ss', new Date())
-      const diffHours = (currDateTime.getTime() - prevDateTime.getTime()) / (1000 * 60 * 60)
+      const prevDateTime = parseDateTime(prevMessage.date, prevMessage.time)
+      const currDateTime = parseDateTime(currMessage.date, currMessage.time)
+      
+      // Only calculate if both dates are valid
+      if (prevDateTime && currDateTime) {
+        const diffHours = (currDateTime.getTime() - prevDateTime.getTime()) / (1000 * 60 * 60)
 
-      if (diffHours >= 6) {
-        inactivityPeriods.push({
-          start: `${prevMessage.date} ${prevMessage.time}`,
-          end: `${currMessage.date} ${currMessage.time}`,
-          duration: diffHours
-        })
+        if (diffHours >= 6) {
+          inactivityPeriods.push({
+            start: `${prevMessage.date} ${prevMessage.time}`,
+            end: `${currMessage.date} ${currMessage.time}`,
+            duration: diffHours
+          })
+        }
       }
     }
 
@@ -637,6 +672,9 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
     // Calculate response time statistics
     const responseTimesInSeconds: number[] = [];
     const userResponseTimes: Record<string, number[]> = {};
+    
+    console.log('Starting response time calculations...');
+    console.log(`Total messages to process: ${messages.length}`);
 
     // Process messages to calculate response times
     for (let i = 1; i < messages.length; i++) {
@@ -646,40 +684,24 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       // Only calculate if different users (responses, not self-replies)
       if (prevMessage.user !== currMessage.user) {
         try {
-          // Add debug logging for date formats
-          console.log(`Date format check - prev: ${prevMessage.date} ${prevMessage.time}, curr: ${currMessage.date} ${currMessage.time}`);
+          // Use our specialized function to parse dates with times
+          const prevDateTime = parseDateTime(prevMessage.date, prevMessage.time);
+          const currDateTime = parseDateTime(currMessage.date, currMessage.time);
           
-          // Try multiple date formats
-          let prevDateTime, currDateTime;
-          try {
-            prevDateTime = parse(`${prevMessage.date} ${prevMessage.time}`, 'dd/MM/yyyy HH:mm:ss', new Date());
-            currDateTime = parse(`${currMessage.date} ${currMessage.time}`, 'dd/MM/yyyy HH:mm:ss', new Date());
-          } catch (parseError) {
-            try {
-              // Try alternative format (MM/dd/yyyy)
-              prevDateTime = parse(`${prevMessage.date} ${prevMessage.time}`, 'MM/dd/yyyy HH:mm:ss', new Date());
-              currDateTime = parse(`${currMessage.date} ${currMessage.time}`, 'MM/dd/yyyy HH:mm:ss', new Date());
-            } catch (altParseError) {
-              // If parsing fails, use a basic approach
-              const [prevDay, prevMonth, prevYear] = prevMessage.date.split('/').map(Number);
-              const [prevHour, prevMin, prevSec] = prevMessage.time.split(':').map(Number);
-              
-              const [currDay, currMonth, currYear] = currMessage.date.split('/').map(Number);
-              const [currHour, currMin, currSec] = currMessage.time.split(':').map(Number);
-              
-              prevDateTime = new Date(prevYear, prevMonth - 1, prevDay, prevHour, prevMin, prevSec);
-              currDateTime = new Date(currYear, currMonth - 1, currDay, currHour, currMin, currSec);
-            }
+          if (!prevDateTime || !currDateTime) {
+            console.warn('Failed to parse dates for response time:', 
+              prevMessage.date, prevMessage.time, 'to', 
+              currMessage.date, currMessage.time);
+            continue;
           }
           
           // Calculate difference in seconds
           const diffSeconds = (currDateTime.getTime() - prevDateTime.getTime()) / 1000;
           
-          // Debug check
-          console.log(`Response time for ${currMessage.user}: ${diffSeconds}s`);
-          
-          // Skip unrealistically long response times (e.g., over 24 hours) or invalid times
+          // Skip unrealistically long or invalid response times
           if (diffSeconds > 0 && diffSeconds < 86400) {
+            console.log(`Valid response time: ${diffSeconds}s from ${prevMessage.user} to ${currMessage.user}`);
+            
             responseTimesInSeconds.push(diffSeconds);
             
             // Track by responder
@@ -687,42 +709,34 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
               userResponseTimes[currMessage.user] = [];
             }
             userResponseTimes[currMessage.user].push(diffSeconds);
+          } else {
+            console.warn(`Invalid response time: ${diffSeconds}s between:`, 
+              `${prevMessage.date} ${prevMessage.time} (${prevMessage.user})`,
+              `${currMessage.date} ${currMessage.time} (${currMessage.user})`);
           }
         } catch (error) {
-          console.warn('Error calculating response time:', error);
-          // Continue processing other messages
+          console.error('Error calculating response time:', error);
         }
       }
     }
-
-    // For testing - generate some sample data if no response times found
-    if (responseTimesInSeconds.length === 0) {
-      console.log("No valid response times found, generating sample data for testing");
-      
-      // Generate synthetic data
-      responseTimesInSeconds.push(
-        5, 15, 25, 45, 120, 600, 2400  // Various time ranges
-      );
-      
-      // Add sample user data
-      if (Object.keys(userResponseTimes).length === 0) {
-        const users = Object.keys(userStats);
-        if (users.length >= 2) {
-          userResponseTimes[users[0]] = [5, 10, 15];
-          userResponseTimes[users[1]] = [20, 30, 40];
-        }
-      }
-    }
-
+    
+    console.log(`Calculated ${responseTimesInSeconds.length} valid response times`);
+    
+    // No synthetic data - only use real data
+    
     // Calculate average response time
     const averageResponseTime = responseTimesInSeconds.length > 0 
       ? responseTimesInSeconds.reduce((sum, time) => sum + time, 0) / responseTimesInSeconds.length 
       : 0;
+      
+    console.log(`Average response time: ${averageResponseTime}s`);
 
     // Calculate average response time per user
     const userAverageResponseTimes: Record<string, number> = {};
     Object.entries(userResponseTimes).forEach(([user, times]) => {
-      userAverageResponseTimes[user] = times.reduce((sum, time) => sum + time, 0) / times.length;
+      if (times.length > 0) {
+        userAverageResponseTimes[user] = times.reduce((sum, time) => sum + time, 0) / times.length;
+      }
     });
 
     // Calculate response time distribution
@@ -736,9 +750,9 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       { range: "1h+", count: responseTimesInSeconds.filter(t => t > 3600).length },
     ];
 
-    // Get fastest responders (users with at least 5 responses)
+    // Get fastest responders (users with at least 2 responses, changed from 5 to ensure we get data)
     const fastestResponders = Object.entries(userResponseTimes)
-      .filter(([_, times]) => times.length >= 5)
+      .filter(([_, times]) => times.length >= 2)
       .map(([user, times]) => ({
         user,
         averageTime: times.reduce((sum, time) => sum + time, 0) / times.length
