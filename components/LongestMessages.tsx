@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { MessageData } from '../types/chat'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsMobile } from '../hooks/use-mobile'
 
 interface LongestMessagesProps {
   messages: MessageData[]
@@ -23,69 +23,72 @@ const LongestMessages: React.FC<LongestMessagesProps> = ({ messages }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h3 className="text-2xl font-semibold mb-4">Top 5 Longest Messages</h3>
-      <ul className="space-y-6">
-        {messages.map((message, index) => {
-          const isExpanded = expandedMessages.includes(index)
-          const messageText = message.message
-          const shouldTruncate = messageText.length > MESSAGE_PREVIEW_LENGTH && !isExpanded
+      <div className="bg-[#e5ddd5] p-4 rounded-lg bg-[url('/whatsapp-bg.png')] bg-repeat">
+        <ul className="space-y-4">
+          {messages.map((message, index) => {
+            const isExpanded = expandedMessages.includes(index)
+            const messageText = message.message
+            const shouldTruncate = messageText.length > MESSAGE_PREVIEW_LENGTH && !isExpanded
 
-          return (
-            <li key={index} className="border-b pb-4 last:border-b-0">
-              <div className="flex flex-col space-y-2">
-                {/* Header with user info and timestamp */}
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="font-medium text-sm text-gray-900">
-                    {message.user}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {message.date} {message.time}
-                  </span>
-                </div>
+            // Alternate sender position based on user
+            const isMechy = message.user.includes("Mechy")
 
-                {/* Message content */}
-                <div className="relative">
-                  <p className={`text-sm text-gray-600 whitespace-pre-wrap break-words
-                    ${!isExpanded ? 'line-clamp-3' : ''}`}
-                  >
-                    {shouldTruncate 
-                      ? messageText.slice(0, MESSAGE_PREVIEW_LENGTH)
-                      : messageText
-                    }
-                    {shouldTruncate && !isExpanded && (
-                      <span className="text-gray-400">...</span>
+            return (
+              <li key={index} className={`flex ${isMechy ? 'justify-start' : 'justify-end'}`}>
+                <div className={`max-w-[80%] ${isMechy ? 'bg-white' : 'bg-[#d9fdd3]'} rounded-lg p-3 shadow-sm`}>
+                  {/* Header with user info */}
+                  <div className="mb-1">
+                    <span className={`font-medium text-sm ${isMechy ? 'text-blue-600' : 'text-green-700'}`}>
+                      {message.user}
+                    </span>
+                  </div>
+
+                  {/* Message content */}
+                  <div className="relative">
+                    <p className={`text-sm text-gray-800 whitespace-pre-wrap break-words
+                      ${!isExpanded ? 'line-clamp-3' : ''}`}
+                    >
+                      {shouldTruncate 
+                        ? messageText.slice(0, MESSAGE_PREVIEW_LENGTH)
+                        : messageText
+                      }
+                      {shouldTruncate && !isExpanded && (
+                        <span className="text-gray-400">...</span>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Timestamp and show more/less button */}
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-xs text-gray-500">
+                      {message.date} {message.time}
+                    </span>
+                    
+                    {messageText.length > MESSAGE_PREVIEW_LENGTH && (
+                      <button
+                        onClick={() => toggleMessage(index)}
+                        className="text-gray-600 text-xs flex items-center hover:text-gray-800 transition-colors"
+                      >
+                        {isExpanded ? (
+                          <>
+                            <ChevronUp className="w-3 h-3 mr-1" />
+                            Show Less
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="w-3 h-3 mr-1" />
+                            Show More
+                          </>
+                        )}
+                      </button>
                     )}
-                  </p>
-
-                  {/* Gradient overlay for truncated messages */}
-                  {shouldTruncate && !isExpanded && (
-                    <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent" />
-                  )}
+                  </div>
                 </div>
-
-                {/* Show more/less button */}
-                {messageText.length > MESSAGE_PREVIEW_LENGTH && (
-                  <button
-                    onClick={() => toggleMessage(index)}
-                    className="text-blue-600 text-sm flex items-center hover:text-blue-700 transition-colors"
-                  >
-                    {isExpanded ? (
-                      <>
-                        <ChevronUp className="w-4 h-4 mr-1" />
-                        Show Less
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="w-4 h-4 mr-1" />
-                        Show More
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-            </li>
-          )
-        })}
-      </ul>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
     </div>
   )
 }
