@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Info } from 'lucide-react';
 
 interface ResponseTimeStatsProps {
   responseTimeStats: {
@@ -17,6 +18,8 @@ interface ResponseTimeStatsProps {
 }
 
 const ResponseTimeStats: React.FC<ResponseTimeStatsProps> = ({ responseTimeStats }) => {
+  const [showExplanation, setShowExplanation] = useState(false);
+  
   // Format time function
   const formatTime = (seconds: number) => {
     if (seconds === 0) return 'N/A';
@@ -39,7 +42,27 @@ const ResponseTimeStats: React.FC<ResponseTimeStatsProps> = ({ responseTimeStats
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <h3 className="text-2xl font-semibold mb-4">Response Time Analysis</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-2xl font-semibold">Response Time Analysis</h3>
+        <div 
+          className="relative cursor-pointer text-gray-500 hover:text-indigo-600"
+          onMouseEnter={() => setShowExplanation(true)}
+          onMouseLeave={() => setShowExplanation(false)}
+        >
+          <Info size={20} />
+          {showExplanation && (
+            <div className="absolute right-0 top-full mt-2 p-4 bg-white shadow-lg rounded-lg z-10 w-64 text-sm text-gray-700">
+              <p className="mb-2 font-semibold">How response times are calculated:</p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li>Only counts responses between different users</li>
+                <li>Messages over 12 hours apart are considered new conversations, not responses</li>
+                <li>Self-replies are ignored</li>
+                <li>Average response time is calculated across all qualifying responses</li>
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
       
       {!hasResponseData ? (
         <div className="p-4 bg-gray-100 rounded-lg text-center">

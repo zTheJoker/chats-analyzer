@@ -676,6 +676,10 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
     console.log('Starting response time calculations...');
     console.log(`Total messages to process: ${messages.length}`);
 
+    // Define conversation boundary in hours (messages more than this apart are considered new conversations)
+    const CONVERSATION_BOUNDARY_HOURS = 12;
+    const CONVERSATION_BOUNDARY_SECONDS = CONVERSATION_BOUNDARY_HOURS * 60 * 60;
+
     // Process messages to calculate response times
     for (let i = 1; i < messages.length; i++) {
       const prevMessage = messages[i - 1];
@@ -698,8 +702,9 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
           // Calculate difference in seconds
           const diffSeconds = (currDateTime.getTime() - prevDateTime.getTime()) / 1000;
           
-          // Skip unrealistically long or invalid response times
-          if (diffSeconds > 0 && diffSeconds < 86400) {
+          // Only count as a response if it's within the conversation boundary
+          // and is a positive time (to avoid any potential time parsing issues)
+          if (diffSeconds > 0 && diffSeconds < CONVERSATION_BOUNDARY_SECONDS) {
             console.log(`Valid response time: ${diffSeconds}s from ${prevMessage.user} to ${currMessage.user}`);
             
             responseTimesInSeconds.push(diffSeconds);
@@ -709,6 +714,8 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
               userResponseTimes[currMessage.user] = [];
             }
             userResponseTimes[currMessage.user].push(diffSeconds);
+          } else if (diffSeconds >= CONVERSATION_BOUNDARY_SECONDS) {
+            console.log(`Skipping - considered a new conversation (gap: ${Math.round(diffSeconds/3600)}h)`);
           } else {
             console.warn(`Invalid response time: ${diffSeconds}s between:`, 
               `${prevMessage.date} ${prevMessage.time} (${prevMessage.user})`,
