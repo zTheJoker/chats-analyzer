@@ -1,9 +1,16 @@
 import React, { useState } from 'react'
 import { Upload } from 'lucide-react'
 import JSZip from 'jszip'
+import { processUploadedFile } from '../utils/fileProcessing'
 
 interface FileUploadProps {
-  onFileUpload: (file: File) => void
+  onFileUpload: (file: File, mediaFiles?: Array<{
+    type: 'image' | 'video' | 'audio' | 'document' | 'pdf' | 'other';
+    url: string;
+    name: string;
+    size?: number;
+    blob: Blob;
+  }>) => void
   isLoading: boolean
 }
 
@@ -15,26 +22,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isLoading }) => {
       if (file.name.toLowerCase().endsWith('.txt')) {
         onFileUpload(file)
       } else if (file.name.toLowerCase().endsWith('.zip')) {
-        const zip = new JSZip()
-        const contents = await zip.loadAsync(file)
-        
-        // Find the first .txt file in the ZIP
-        const txtFile = Object.values(contents.files).find(f => 
-          !f.dir && f.name.toLowerCase().endsWith('.txt') && 
-          (f.name.toLowerCase().includes('chat') || f.name.toLowerCase().includes('whatsapp'))
-        )
-
-        if (!txtFile) {
-          throw new Error('No WhatsApp chat export file found in the ZIP')
-        }
-
-        // Get the text content
-        const textContent = await txtFile.async('blob')
-        const chatFile = new File([textContent], txtFile.name, {
-          type: 'text/plain'
-        })
-
-        onFileUpload(chatFile)
+        const result = await processUploadedFile(file)
+        onFileUpload(result.textFile, result.mediaFiles)
       } else {
         throw new Error('Please upload a .txt or .zip file')
       }

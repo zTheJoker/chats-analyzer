@@ -25,6 +25,7 @@ const MostRepliedMessages = dynamic(() => import('@/components/MostRepliedMessag
 const KeyStatistics = dynamic(() => import('@/components/KeyStatistics'), { ssr: false })
 const ResponseTimeStats = dynamic(() => import('@/components/ResponseTimeStats'), { ssr: false })
 const DownloadPDF = dynamic(() => import('@/components/DownloadPDF'), { ssr: false })
+const MediaGallery = dynamic(() => import('@/components/MediaGallery'), { ssr: false })
 
 export default function Results() {
   const [chatData, setChatData] = useState<ChatData | null>(null)
@@ -121,6 +122,9 @@ export default function Results() {
         <div id="report-content" className="space-y-6 md:space-y-8">
           <KeyStatistics chatData={chatData} emojiStats={chatData.emojiStats} />
           <ChatStats chatData={chatData} />
+          {chatData.hasMedia && chatData.media && chatData.media.length > 0 && (
+            <MediaGallery media={chatData.media} />
+          )}
           <WeekdayActivity data={chatData.weekdayActivity} />
           <MessageLengthDistribution data={chatData.messageLengthDistribution} />
           {chatData.responseTimeStats && (

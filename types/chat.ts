@@ -10,6 +10,14 @@ export interface MessageData {
   message: string
 }
 
+export interface MediaData {
+  type: 'image' | 'video' | 'audio' | 'document' | 'pdf' | 'other'
+  url: string
+  name: string
+  size?: number
+  thumbnail?: string
+}
+
 export interface ChatData {
   totalMessages: number;
   totalWordCount: number;
@@ -24,6 +32,8 @@ export interface ChatData {
       wordCount: number;
     }
   };
+  media?: MediaData[];
+  hasMedia: boolean;
   uniqueWordsPerUser: {
     [key: string]: Set<string>;
   };

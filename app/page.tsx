@@ -13,7 +13,7 @@ export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [processingStats, setProcessingStats] = useState<{ processed: number; skipped: number } | null>(null)
+  const [processingStats, setProcessingStats] = useState<{ processed: number; skipped: number; mediaFiles?: number } | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -42,7 +42,13 @@ export default function Home() {
     }
   }, [])
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, mediaFiles?: Array<{
+    type: 'image' | 'video' | 'audio' | 'document' | 'pdf' | 'other';
+    url: string;
+    name: string;
+    size?: number;
+    blob: Blob;
+  }>) => {
     setIsLoading(true)
     setError(null)
     setProcessingStats(null)
@@ -53,11 +59,26 @@ export default function Home() {
       }
       const processedData = await processWhatsAppChat(text)
       
+      // Add media data if available
+      if (mediaFiles && mediaFiles.length > 0) {
+        // Convert the blob media files to the format expected by ChatData
+        processedData.media = mediaFiles.map(file => ({
+          type: file.type,
+          url: file.url,
+          name: file.name,
+          size: file.size
+        }))
+        processedData.hasMedia = true
+      } else {
+        processedData.hasMedia = false
+      }
+      
       try {
         await dbService.store('currentChat', processedData)
         setProcessingStats({
           processed: processedData.totalMessages,
-          skipped: processedData.systemMessages.length
+          skipped: processedData.systemMessages.length,
+          mediaFiles: mediaFiles?.length || 0
         })
         router.push('/results')
       } catch (dbError) {
