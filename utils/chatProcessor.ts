@@ -9,6 +9,15 @@ const WHATSAPP_SYSTEM_WORDS = new Set([
   'missed', 'call', 'voice', 'ended', 'started', 'changed', 'security', 'code', 'invite',
   'link', 'description', 'subject', 'icon', 'participants', 'now', 'admin',
   
+  // Media and file-related terms
+  'file', 'attached', 'jpg', 'jpeg', 'png', 'opus', 'pdf', 'mp3', 'mp4', 'avi', 'mov',
+  'webp', 'docx', 'xlsx', 'pptx', 'txt', 'zip', 'rar', 'attachment', 'sent', 'received',
+  
+  // Common pronouns and short words often in messages
+  'it', 'me', 'im', 'i', 'my', 'mine', 'we', 'us', 'our', 'ours', 'they', 'them', 'their',
+  'so', 'is', 'are', 'am', 'be', 'been', 'was', 'were', 'will', 'would', 'can', 'could',
+  'should', 'may', 'might', 'must', 'just', 'very', 'too', 'also', 'here', 'there',
+  
   // Common words to filter in multiple languages
   'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
   'el', 'la', 'los', 'las', 'un', 'una', 'y', 'o', 'pero', 'en', 'sobre', 'para', 'de', 'con',
