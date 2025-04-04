@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { MediaData } from '../types/chat'
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
 import { Button } from './ui/button'
-import { Image, FileText, Video, FileAudio, ArrowRight, X } from 'lucide-react'
+import { Image, FileText, Video, FileAudio, ArrowRight, X, ChevronUp, ChevronDown, Maximize, Minimize } from 'lucide-react'
 
 interface MediaGalleryProps {
   media: MediaData[]
@@ -11,6 +11,7 @@ interface MediaGalleryProps {
 const MediaGallery: React.FC<MediaGalleryProps> = ({ media }) => {
   const [openMedia, setOpenMedia] = useState<MediaData | null>(null)
   const [showAll, setShowAll] = useState(false)
+  const [minimized, setMinimized] = useState(false)
   
   // Get media by type for organized display
   const images = media.filter(item => item.type === 'image')
@@ -19,12 +20,12 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({ media }) => {
   const audio = media.filter(item => item.type === 'audio')
   const other = media.filter(item => item.type === 'other')
   
-  // Display a small preview of images (up to 4)
-  const previewImages = images.slice(0, 4)
+  // Create sorted preview - prioritize images first, then videos, then other media
+  const sortedMedia = [...images, ...videos, ...audio, ...documents, ...other]
   const hasMoreMedia = media.length > 4
   
-  const displayCount = showAll ? media.length : Math.min(media.length, 4)
-  const previewMedia = showAll ? media : media.slice(0, 4)
+  // Display a small preview (up to 4 items), prioritizing images
+  const previewMedia = showAll ? sortedMedia : sortedMedia.slice(0, 4)
   
   if (!media || media.length === 0) {
     return null
@@ -74,88 +75,113 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({ media }) => {
   
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mt-8">
-      <h3 className="text-2xl font-semibold mb-4">Media Files</h3>
-      
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {previewMedia.map((item, index) => (
-          <div key={`${item.name}-${index}`} className="aspect-square">
-            {renderMediaItem(item)}
-          </div>
-        ))}
-      </div>
-      
-      {hasMoreMedia && (
-        <div className="mt-4 flex justify-center">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-2xl font-semibold">Media Files</h3>
+        <div className="flex gap-2">
           <Button 
-            onClick={() => setShowAll(!showAll)}
-            variant="outline"
-            className="flex items-center gap-2"
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setMinimized(!minimized)}
+            className="flex items-center gap-1"
           >
-            {showAll ? (
-              <>Show Less <X className="h-4 w-4" /></>
-            ) : (
-              <>Show All Media ({media.length}) <ArrowRight className="h-4 w-4" /></>
-            )}
+            {minimized ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            {minimized ? 'Expand' : 'Minimize'}
           </Button>
         </div>
+      </div>
+      
+      {!minimized && (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {previewMedia.map((item, index) => (
+              <div key={`${item.name}-${index}`} className="aspect-square">
+                {renderMediaItem(item)}
+              </div>
+            ))}
+          </div>
+          
+          {hasMoreMedia && (
+            <div className="mt-4 flex justify-center">
+              <Button 
+                onClick={() => setShowAll(!showAll)}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                {showAll ? (
+                  <>Show Less <X className="h-4 w-4" /></>
+                ) : (
+                  <>Show All Media ({media.length}) <ArrowRight className="h-4 w-4" /></>
+                )}
+              </Button>
+            </div>
+          )}
+        </>
       )}
       
       {/* Full-size media viewer */}
       <Dialog open={!!openMedia} onOpenChange={(open) => !open && setOpenMedia(null)}>
         <DialogContent className="max-w-4xl w-fit max-h-[90vh] overflow-auto">
           {openMedia && (
-            <div className="flex flex-col items-center">
-              {openMedia.type === 'image' && (
-                <img 
-                  src={openMedia.url} 
-                  alt={openMedia.name} 
-                  className="max-h-[70vh] object-contain" 
-                />
-              )}
-              
-              {openMedia.type === 'video' && (
-                <video 
-                  src={openMedia.url} 
-                  controls 
-                  className="max-h-[70vh]"
-                />
-              )}
-              
-              {openMedia.type === 'audio' && (
-                <audio 
-                  src={openMedia.url} 
-                  controls 
-                  className="w-full" 
-                />
-              )}
-              
-              {(openMedia.type === 'document' || openMedia.type === 'pdf' || openMedia.type === 'other') && (
-                <iframe 
-                  src={openMedia.url} 
-                  className="w-full h-[70vh]"
-                  title={openMedia.name}
-                />
-              )}
-              
-              <div className="mt-4 text-center">
-                <p className="font-medium">{openMedia.name}</p>
-                {openMedia.size && (
-                  <p className="text-sm text-gray-500">
-                    {(openMedia.size / 1024).toFixed(1)} KB
-                  </p>
-                )}
-                
-                <Button 
-                  className="mt-4"
-                  variant="outline"
-                  asChild
-                >
-                  <a href={openMedia.url} download={openMedia.name} target="_blank" rel="noreferrer">
-                    Download
-                  </a>
+            <>
+              <div className="absolute top-3 right-3 z-10 flex gap-2">
+                <Button variant="outline" size="icon" onClick={() => setOpenMedia(null)}>
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
+              
+              <div className="flex flex-col items-center pt-6">
+                {openMedia.type === 'image' && (
+                  <img 
+                    src={openMedia.url} 
+                    alt={openMedia.name} 
+                    className="max-h-[70vh] object-contain" 
+                  />
+                )}
+                
+                {openMedia.type === 'video' && (
+                  <video 
+                    src={openMedia.url} 
+                    controls 
+                    className="max-h-[70vh]"
+                  />
+                )}
+                
+                {openMedia.type === 'audio' && (
+                  <audio 
+                    src={openMedia.url} 
+                    controls 
+                    className="w-full" 
+                  />
+                )}
+                
+                {(openMedia.type === 'document' || openMedia.type === 'pdf' || openMedia.type === 'other') && (
+                  <iframe 
+                    src={openMedia.url} 
+                    className="w-full h-[70vh]"
+                    title={openMedia.name}
+                  />
+                )}
+                
+                <div className="mt-4 text-center">
+                  <p className="font-medium">{openMedia.name}</p>
+                  {openMedia.size && (
+                    <p className="text-sm text-gray-500">
+                      {(openMedia.size / 1024).toFixed(1)} KB
+                    </p>
+                  )}
+                  
+                  <Button 
+                    className="mt-4"
+                    variant="outline"
+                    asChild
+                  >
+                    <a href={openMedia.url} download={openMedia.name} target="_blank" rel="noreferrer">
+                      Download
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
