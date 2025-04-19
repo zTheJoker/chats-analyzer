@@ -200,31 +200,103 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="p-4 bg-white">
-              <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-inner bg-gray-100 flex items-center justify-center">
-                <div className="text-center p-4">
-                  <p className="text-lg font-medium text-gray-800">Get beautiful charts and visualizations including:</p>
-                  <ul className="mt-2 text-gray-600 grid grid-cols-2 gap-2">
+            <div className="p-6 bg-white">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gray-50 p-5 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3 text-blue-700">Chat Overview</h3>
+                  <ul className="space-y-2">
                     <li className="flex items-center">
-                      <span className="mr-1 text-green-500">✓</span> Message timelines
+                      <span className="mr-2 text-green-500">✓</span> Participant count & role insights
                     </li>
                     <li className="flex items-center">
-                      <span className="mr-1 text-green-500">✓</span> Emoji usage
+                      <span className="mr-2 text-green-500">✓</span> Total message analytics
                     </li>
                     <li className="flex items-center">
-                      <span className="mr-1 text-green-500">✓</span> User rankings
-                    </li>
-                    <li className="flex items-center">
-                      <span className="mr-1 text-green-500">✓</span> Response times
-                    </li>
-                    <li className="flex items-center">
-                      <span className="mr-1 text-green-500">✓</span> Word clouds
-                    </li>
-                    <li className="flex items-center">
-                      <span className="mr-1 text-green-500">✓</span> Activity heatmaps
+                      <span className="mr-2 text-green-500">✓</span> Most-used emojis breakdown
                     </li>
                   </ul>
                 </div>
+                
+                <div className="bg-gray-50 p-5 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3 text-purple-700">User Rankings</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Most/least active user badges
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Top 10 users pie chart
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Per-user message & word counts
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="bg-gray-50 p-5 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3 text-green-700">Content Insights</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Most-common words list
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Message-length distribution
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Top longest & most-replied messages
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="bg-gray-50 p-5 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3 text-amber-700">Temporal Analytics</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Message timeline visualization
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Hourly & weekday activity charts
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> "Biggest time-gap" call-out
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div className="bg-gray-50 p-5 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3 text-blue-700">Media & Links</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Inline media gallery with counter
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Link statistics (total & top domains)
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="bg-gray-50 p-5 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3 text-purple-700">Conversation Dynamics</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Conversation starters/closers leaderboard
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Average response time distribution
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Fastest responder badge
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2 text-green-500">✓</span> Full report export option
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="mt-6 bg-blue-50 p-5 rounded-lg">
+                <p className="text-sm text-center text-blue-600">All features are private and processed entirely in your browser – no data ever leaves your device.</p>
               </div>
             </div>
           </section>
