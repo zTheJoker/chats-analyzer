@@ -78,9 +78,7 @@ npm run start
 
 Contributions are welcome! Feel free to open issues or pull requests.
 
-## License
 
-This project is proprietary software.
 
 ## Contact
 
