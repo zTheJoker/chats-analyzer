@@ -174,32 +174,6 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-center">See What You'll Get</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-6">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 p-4 rounded-lg shadow">
-                <h3 className="font-semibold text-blue-800">Total Messages</h3>
-                <p className="text-3xl font-bold text-blue-900">10,847</p>
-                <p className="text-sm text-blue-700">Since Jan 15, 2023</p>
-              </div>
-              
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 p-4 rounded-lg shadow">
-                <h3 className="font-semibold text-purple-800">Words Written</h3>
-                <p className="text-3xl font-bold text-purple-900">149,632</p>
-                <p className="text-sm text-purple-700">13.8 words per message</p>
-              </div>
-              
-              <div className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 p-4 rounded-lg shadow">
-                <h3 className="font-semibold text-green-800">Daily Average</h3>
-                <p className="text-3xl font-bold text-green-900">24.6</p>
-                <p className="text-sm text-green-700">Messages per day</p>
-              </div>
-              
-              <div className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200 p-4 rounded-lg shadow">
-                <h3 className="font-semibold text-amber-800">Participants</h3>
-                <p className="text-3xl font-bold text-amber-900">5</p>
-                <p className="text-sm text-amber-700">Active users</p>
-              </div>
-            </div>
-            
             <div className="p-6 bg-white">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-gray-50 p-5 rounded-lg">
