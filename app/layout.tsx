@@ -54,10 +54,10 @@ export const metadata: Metadata = {
     description: 'Analyze your WhatsApp chats instantly with our free online tool. Get detailed message patterns, emoji stats, response times, and chat insights. 100% private & secure - your data never leaves your device.',
     siteName: 'WhatsApp Chat Analyzer',
     images: [{
-      url: '/logo-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'WhatsApp Chat Analyzer Logo'
+      url: '/banner.png',
+      width: 1200,
+      height: 630,
+      alt: 'WhatsApp Chat Analyzer'
     }],
   },
   twitter: {
@@ -65,10 +65,10 @@ export const metadata: Metadata = {
     title: 'WhatsApp Chat Analyzer - Free Online Chat Analysis Tool',
     description: 'Analyze your WhatsApp chats instantly with our free online tool. Get detailed message patterns, emoji stats, response times, and chat insights. 100% private & secure - your data never leaves your device.',
     images: [{
-      url: '/logo-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'WhatsApp Chat Analyzer Logo'
+      url: '/banner.png',
+      width: 1200,
+      height: 630,
+      alt: 'WhatsApp Chat Analyzer'
     }],
   },
   alternates: {
