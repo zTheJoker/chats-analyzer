@@ -337,9 +337,13 @@ export default function Home() {
                     <a href="/export" className="text-gray-600 hover:underline">How to Export</a>
                   </p>
                 </div>
+                <div className="flex justify-center mt-4">
+                  <a href="https://www.producthunt.com/posts/whatsapp-chat-analyzer?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-whatsapp-chat-analyzer" target="_blank" rel="noopener noreferrer">
+                    <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=955186&theme=light&t=1745021768528" alt="WhatsApp Chat Analyzer - Free online whatapp chat analysis tool | Product Hunt" style={{width: "250px", height: "54px"}} width="250" height="54" />
+                  </a>
+                </div>
                 <p className="text-center mt-4 text-xs">© {new Date().getFullYear()} WhatsApp Chat Analyzer</p>
-              </div>
-            </div>
+              </div>            </div>
           </footer>
         </div>
       </div>

@@ -31,10 +31,16 @@ export default function Results() {
   const [chatData, setChatData] = useState<ChatData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [showWelcomeStats, setShowWelcomeStats] = useState(false)
+  const [showProductHuntBanner, setShowProductHuntBanner] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+
+    // Check if Product Hunt banner should be displayed (36 hours from July 17, 2024)
+    const expirationTime = new Date('2025-04-20T12:00:00Z').getTime();
+    const currentTime = new Date().getTime();
+    setShowProductHuntBanner(currentTime < expirationTime);
 
     const fetchData = async () => {
       try {
@@ -109,6 +115,30 @@ export default function Results() {
         onOpenChange={setShowWelcomeStats} 
       />
       <SupportPopup trigger="scroll" />
+      
+      {showProductHuntBanner && (
+        <div className="bg-gradient-to-r from-orange-100 to-pink-100 border-b border-orange-200 py-3">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-center">
+              <p className="font-medium text-orange-800">
+                We're live on Product Hunt! If you enjoyed our tool, please give us an upvote 🙏
+              </p>
+              <a href="https://www.producthunt.com/posts/whatsapp-chat-analyzer?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-whatsapp-chat-analyzer" 
+                target="_blank" 
+                rel="noopener noreferrer">
+                <img 
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=955186&theme=light&t=1745021768528" 
+                  alt="WhatsApp Chat Analyzer - Free online whatapp chat analysis tool | Product Hunt" 
+                  style={{width: "250px", height: "54px"}} 
+                  width="250" 
+                  height="54" 
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="container mx-auto px-4 py-6 md:py-12">
         <div className="flex items-center justify-between mb-8">
           <img src="/logo.png" alt="WhatsApp Analyzer Logo" className="h-10 md:h-16 w-auto" />
@@ -160,6 +190,19 @@ export default function Results() {
                 <a href="/privacy" className="hover:text-gray-600">Privacy</a>
                 {' · '}
                 <a href="mailto:support@convoanalyzer.com" className="hover:text-gray-600">Support</a>
+              </div>
+              <div className="mt-4">
+                <a href="https://www.producthunt.com/posts/whatsapp-chat-analyzer?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-whatsapp-chat-analyzer" 
+                   target="_blank" 
+                   rel="noopener noreferrer">
+                  <img 
+                    src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=955186&theme=light&t=1745021768528" 
+                    alt="WhatsApp Chat Analyzer - Free online whatapp chat analysis tool | Product Hunt" 
+                    style={{width: "250px", height: "54px"}} 
+                    width="250" 
+                    height="54" 
+                  />
+                </a>
               </div>
             </div>
           </div>
