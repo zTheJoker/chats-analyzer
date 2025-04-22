@@ -1,5 +1,4 @@
 import { ImageResponse } from 'next/server';
-import { join } from 'path';
 
 export const runtime = 'edge';
 
