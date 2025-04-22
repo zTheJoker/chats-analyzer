@@ -166,7 +166,9 @@ export default function Results() {
           <ConversationStarters data={chatData.conversationStarters} />
           <InactivityPeriods biggestTimeStop={chatData.biggestTimeStop} />
           <LongestConversations conversations={chatData.longestConversations} />
-          <MostRepliedMessages messages={chatData.mostRepliedMessages} />
+          {chatData.mostRepliedMessages && chatData.mostRepliedMessages.length > 0 && (
+            <MostRepliedMessages messages={chatData.mostRepliedMessages} />
+          )}
         </div>
 
         <div className="mt-8 md:mt-12 border-t border-gray-200 pt-6">

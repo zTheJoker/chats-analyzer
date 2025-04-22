@@ -659,25 +659,107 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
     // Calculate messages with most replies
     const messageReplies: Record<string, { message: MessageData; replyCount: number }> = {}
     messages.forEach((message, index) => {
+      // Check for multiple reply patterns:
+      // 1. Standard @username format
+      // 2. Messages that start with a username followed by a colon (User: message)
+      // 3. Messages that contain "replying to" format which happens when someone quotes a message
+      // 4. Messages that use WhatsApp quoting format with ⟫ symbol or brackets
+      
+      // Pattern 1: @username
       const replyMatch = message.message.match(/^@(\S+)/)
+      
+      // Pattern 2: Username: message 
+      const colonReplyMatch = message.message.match(/^([^:]+):\s/)
+      
+      // Pattern 3: Messages containing quoted content or "replying to"
+      const quotedReplyMatch = message.message.includes('⟩') || 
+                              message.message.toLowerCase().includes('replying to')
+      
+      // Pattern 4: WhatsApp quote formats
+      const whatsAppQuoteMatch = 
+            message.message.includes('⟫') || 
+            message.message.includes('⟩⟩') ||
+            message.message.includes('>>') ||
+            (message.message.includes('[') && message.message.includes(']'))
+            
+      // Pattern 5: Direct name mentions at start of message (common in group chats)
+      let directMentionMatch = null
+      // Only check for direct mentions in messages with at least 2 words (to avoid false positives)
+      const words = message.message.split(/\s+/)
+      if (words.length >= 2) {
+        // Check if any username appears at the start of the message
+        const usernames = Object.keys(userStats)
+        for (const username of usernames) {
+          // Only consider usernames with 3+ characters to avoid false positives with short names
+          if (username.length >= 3 && 
+              message.message.toLowerCase().startsWith(username.toLowerCase())) {
+            directMentionMatch = username
+            break
+          }
+        }
+      }
+      
+      let repliedUser = null
+      
       if (replyMatch) {
-        const repliedUser = replyMatch[1]
-        for (let i = index - 1; i >= 0; i--) {
-          if (messages[i].user === repliedUser) {
+        // @username format
+        repliedUser = replyMatch[1]
+      } else if (colonReplyMatch) {
+        // Check if the text before colon matches a username in the chat
+        const possibleUser = colonReplyMatch[1].trim()
+        // Verify this is actually a username in our chat
+        const isKnownUser = Object.keys(userStats).some(user => 
+          user.toLowerCase() === possibleUser.toLowerCase())
+        
+        if (isKnownUser) {
+          repliedUser = possibleUser
+        }
+      } else if (directMentionMatch) {
+        // Direct name mention
+        repliedUser = directMentionMatch
+      }
+      
+      // If we identified a replied user, look for their message
+      if (repliedUser) {
+        // Look for the most recent message from this user
+        for (let i = index - 1; i >= 0 && i >= index - 10; i--) {
+          if (messages[i].user === repliedUser || 
+              messages[i].user.toLowerCase() === repliedUser.toLowerCase()) {
             const key = `${messages[i].date}-${messages[i].time}-${messages[i].user}`
             if (messageReplies[key]) {
               messageReplies[key].replyCount++
             } else {
               messageReplies[key] = { message: messages[i], replyCount: 1 }
             }
+            console.log(`Detected reply: ${message.user} replied to ${messages[i].user}'s message`)
             break
           }
+        }
+      } else if (quotedReplyMatch || whatsAppQuoteMatch) {
+        // For quoted content, just assume it's replying to the previous message
+        // if from a different user (simpler heuristic)
+        if (index > 0 && message.user !== messages[index-1].user) {
+          const prevMessage = messages[index-1]
+          const key = `${prevMessage.date}-${prevMessage.time}-${prevMessage.user}`
+          if (messageReplies[key]) {
+            messageReplies[key].replyCount++
+          } else {
+            messageReplies[key] = { message: prevMessage, replyCount: 1 }
+          }
+          console.log(`Detected quoted reply: ${message.user} replied to ${prevMessage.user}'s message`)
         }
       }
     })
     const mostRepliedMessages = Object.values(messageReplies)
       .sort((a, b) => b.replyCount - a.replyCount)
       .slice(0, 3)
+      
+    // Log a summary of reply detection
+    console.log(`Detected ${Object.keys(messageReplies).length} replied messages in total`)
+    console.log(`Top ${mostRepliedMessages.length} most replied messages:`)
+    mostRepliedMessages.forEach((item, index) => {
+      console.log(`${index + 1}. ${item.message.user}: "${item.message.message.substring(0, 30)}..." - ${item.replyCount} replies`)
+    })
 
     console.log(`Processed ${processedLines} lines, skipped ${skippedLines} lines.`)
     // Calculate response time statistics
