@@ -11,38 +11,26 @@ export const size = {
 export const contentType = 'image/png';
 
 export default async function Image() {
-  // Use the public banner.png directly
   return new ImageResponse(
     (
       <div
         style={{
-          background: 'white',
           width: '100%',
           height: '100%',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
+          backgroundColor: '#f5f7fa',
+          padding: '40px',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-            height: '100%',
-            background: 'linear-gradient(to right, #f5f7fa, #c3cfe2)',
-            padding: '40px',
-          }}
-        >
-          <h1 style={{ fontSize: '60px', color: '#4A148C', margin: '0 0 20px' }}>
-            WhatsApp Chat Analyzer
-          </h1>
-          <p style={{ fontSize: '32px', color: '#333', textAlign: 'center' }}>
-            Private, instant insights from your conversations
-          </p>
-        </div>
+        <h1 style={{ fontSize: '60px', color: '#4A148C', margin: '0 0 20px' }}>
+          WhatsApp Chat Analyzer
+        </h1>
+        <p style={{ fontSize: '32px', color: '#333', textAlign: 'center' }}>
+          Private, instant insights from your conversations
+        </p>
       </div>
     ),
     {
