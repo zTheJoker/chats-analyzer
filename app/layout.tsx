@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     description: 'Analyze your WhatsApp chats instantly with our free online tool. Get detailed message patterns, emoji stats, response times, and chat insights. 100% private & secure - your data never leaves your device.',
     siteName: 'WhatsApp Chat Analyzer',
     images: [{
-      url: '/banner.png',
+      url: 'https://convoanalyzer.com/banner.png',
       width: 1200,
       height: 630,
       alt: 'WhatsApp Chat Analyzer'
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     title: 'WhatsApp Chat Analyzer - Free Online Chat Analysis Tool',
     description: 'Analyze your WhatsApp chats instantly with our free online tool. Get detailed message patterns, emoji stats, response times, and chat insights. 100% private & secure - your data never leaves your device.',
     images: [{
-      url: '/banner.png',
+      url: 'https://convoanalyzer.com/banner.png',
       width: 1200,
       height: 630,
       alt: 'WhatsApp Chat Analyzer'
