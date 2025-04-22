@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { PostHogProvider } from './providers'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://convoanalyzer.com'),
   title: {
     default: 'WhatsApp Chat Analyzer - Free Online Chat Analysis Tool',
     template: '%s | WhatsApp Chat Analyzer'
@@ -54,7 +55,7 @@ export const metadata: Metadata = {
     description: 'Analyze your WhatsApp chats instantly with our free online tool. Get detailed message patterns, emoji stats, response times, and chat insights. 100% private & secure - your data never leaves your device.',
     siteName: 'WhatsApp Chat Analyzer',
     images: [{
-      url: 'https://convoanalyzer.com/banner.png',
+      url: '/banner.png',
       width: 1200,
       height: 630,
       alt: 'WhatsApp Chat Analyzer'
@@ -65,7 +66,7 @@ export const metadata: Metadata = {
     title: 'WhatsApp Chat Analyzer - Free Online Chat Analysis Tool',
     description: 'Analyze your WhatsApp chats instantly with our free online tool. Get detailed message patterns, emoji stats, response times, and chat insights. 100% private & secure - your data never leaves your device.',
     images: [{
-      url: 'https://convoanalyzer.com/banner.png',
+      url: '/banner.png',
       width: 1200,
       height: 630,
       alt: 'WhatsApp Chat Analyzer'
