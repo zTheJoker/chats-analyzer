@@ -171,7 +171,11 @@ const ChatStats: React.FC<ChatStatsProps> = ({ chatData }) => {
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-2xl font-semibold mb-4">Top 10 Users by Message Count</h3>
+        <h3 className="text-2xl font-semibold mb-4">
+          {userMessageData.length < 10 
+            ? `User Message Count (${userMessageData.length})` 
+            : "Top 10 Users by Message Count"}
+        </h3>
         <ResponsiveContainer width="100%" height={400}>
           <PieChart>
             <Pie
