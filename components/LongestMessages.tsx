@@ -30,15 +30,15 @@ const LongestMessages: React.FC<LongestMessagesProps> = ({ messages }) => {
             const messageText = message.message
             const shouldTruncate = messageText.length > MESSAGE_PREVIEW_LENGTH && !isExpanded
 
-            // Alternate sender position based on user
-            const isMechy = message.user.includes("Mechy")
+            // Determine the message position based on the user (alternating sides)
+            const isOddIndex = index % 2 !== 0
 
             return (
-              <li key={index} className={`flex ${isMechy ? 'justify-start' : 'justify-end'}`}>
-                <div className={`max-w-[80%] ${isMechy ? 'bg-white' : 'bg-[#d9fdd3]'} rounded-lg p-3 shadow-sm`}>
+              <li key={index} className={`flex ${isOddIndex ? 'justify-start' : 'justify-end'}`}>
+                <div className={`max-w-[80%] ${isOddIndex ? 'bg-white' : 'bg-[#d9fdd3]'} rounded-lg p-3 shadow-sm`}>
                   {/* Header with user info */}
                   <div className="mb-1">
-                    <span className={`font-medium text-sm ${isMechy ? 'text-blue-600' : 'text-green-700'}`}>
+                    <span className={`font-medium text-sm ${isOddIndex ? 'text-blue-600' : 'text-green-700'}`}>
                       {message.user}
                     </span>
                   </div>
