@@ -5,6 +5,7 @@ import InactivityPeriods from './InactivityPeriods'
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card'
 import UserStatsCard from './UserStatsCard'
 import { ChevronUp, ChevronDown, Trophy, UserMinus } from 'lucide-react'
+import { safeFormatDate } from '../lib/utils'
 
 interface ChatStatsProps {
   chatData: ChatData
@@ -44,7 +45,7 @@ const ChatStats: React.FC<ChatStatsProps> = ({ chatData }) => {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-blue-900">{chatData.totalMessages.toLocaleString()}</p>
-            <p className="text-sm text-blue-700">Since {chatData.firstMessageDate}</p>
+            <p className="text-sm text-blue-700">Since {safeFormatDate(chatData.firstMessageDate, { month: 'short', day: 'numeric', year: 'numeric' }, 'Unknown date')}</p>
           </CardContent>
         </Card>
 

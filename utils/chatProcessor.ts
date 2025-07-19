@@ -31,7 +31,14 @@ function isNonLatinChar(char: string): boolean {
 
 function getWeekday(dateString: string): string {
   const date = parse(dateString, 'dd/MM/yyyy', new Date())
-  return date.toLocaleDateString('en-US', { weekday: 'long' })
+  if (!isValid(date)) {
+    return 'Unknown'
+  }
+  try {
+    return date.toLocaleDateString('en-US', { weekday: 'long' })
+  } catch {
+    return 'Unknown'
+  }
 }
 
 function countEmojis(text: string): number {
@@ -452,7 +459,9 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       userMessageCountByDate[user][normalizedDate] = (userMessageCountByDate[user][normalizedDate] || 0) + 1
 
       const hour = parseInt(time.split(':')[0], 10)
-      messagesByHour[hour]++
+      if (!isNaN(hour) && hour >= 0 && hour <= 23) {
+        messagesByHour[hour]++
+      }
 
       // Process words for frequency using our improved method
       if (!isSystemMessage && user && message) {
@@ -538,7 +547,13 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       });
 
       if (!firstMessageDate && normalizedDate) {
-        firstMessageDate = normalizedDate
+        // Convert the normalized date to ISO format for better compatibility
+        try {
+          const isoDate = format(parsedDate, 'yyyy-MM-dd')
+          firstMessageDate = isoDate
+        } catch {
+          firstMessageDate = normalizedDate
+        }
       }
 
       // Word processing is now handled earlier in a more accurate way
@@ -546,7 +561,7 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
 
     // Ensure safe calculations
     const totalDays = Object.keys(messageCountByDate).length || 1
-    const averageMessagesPerDay = totalMessages / totalDays
+    const averageMessagesPerDay = totalDays > 0 ? totalMessages / totalDays : 0
 
     // Sort users by message count
     const sortedUsers = Object.entries(userStats).sort((a, b) => b[1].messageCount - a[1].messageCount)
@@ -884,7 +899,7 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       longestConversations,
       mostRepliedMessages,
       systemMessages,
-      firstMessageDate: firstMessageDate || new Date().toISOString().split('T')[0],
+      firstMessageDate: firstMessageDate || format(new Date(), 'yyyy-MM-dd'),
       uniqueWordsPerUser,
       responseTimeStats: {
         averageResponseTime,

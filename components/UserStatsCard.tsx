@@ -11,7 +11,9 @@ interface UserStatsCardProps {
 }
 
 const UserStatsCard: React.FC<UserStatsCardProps> = ({ user, stats, uniqueWords, totalMessages, rank }) => {
-  const messagePercentage = ((stats.messageCount / totalMessages) * 100).toFixed(1)
+  const messagePercentage = totalMessages > 0 
+    ? ((stats.messageCount / totalMessages) * 100).toFixed(1)
+    : '0.0'
   // Ensure wordCount and messageCount are valid numbers to avoid NaN
   const averageWordsPerMessage = stats.messageCount > 0 
     ? (stats.wordCount / stats.messageCount).toFixed(1) 

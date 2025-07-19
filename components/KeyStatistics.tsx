@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { ChatData, UserStats } from '../types/chat'
 import { ChevronDown, ChevronUp, MessageCircle, Type, Smile, Users } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { safeFormatDate } from '../lib/utils'
 
 interface UserKeyStats {
   user: string
@@ -23,10 +24,11 @@ const KeyStatistics: React.FC<KeyStatisticsProps> = ({ chatData, emojiStats }) =
   const totalMessages = chatData.totalMessages
   const avgMessagesPerDay = chatData.averageMessagesPerDay.toFixed(1)
   
-  const formattedDate = new Date(chatData.firstMessageDate).toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric'
-  })
+  const formattedDate = safeFormatDate(
+    chatData.firstMessageDate,
+    { month: 'long', year: 'numeric' },
+    'Unknown date'
+  )
   
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">

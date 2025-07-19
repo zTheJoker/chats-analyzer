@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { ChatData } from '@/types/chat'
 import { Users, MessageCircle, Clock, Calendar } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { safeDateDiff } from '@/lib/utils'
 
 interface WelcomeStatsPopupProps {
   chatData?: ChatData;
@@ -32,10 +33,7 @@ export function WelcomeStatsPopup({ chatData, isOpen, onOpenChange }: WelcomeSta
       const maxWords = chatData.totalWordCount
       
       // Calculate days between first message and now
-      const firstDate = new Date(chatData.firstMessageDate)
-      const today = new Date()
-      const diffTime = Math.abs(today.getTime() - firstDate.getTime())
-      const maxDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      const maxDays = safeDateDiff(chatData.firstMessageDate)
       
       // Animate the counts
       const duration = 2000 // 2 seconds
