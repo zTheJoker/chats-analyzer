@@ -3,6 +3,7 @@ import { parse, format, isValid } from 'date-fns'
 import emojiRegex from 'emoji-regex'
 
 const WHATSAPP_SYSTEM_WORDS = new Set([
+  // WhatsApp system messages and media
   'created', 'changed', 'left', 'added', 'removed', 'joined', 'using', 'link', 'deleted', 'omitted',
   'this', 'message', 'was', 'edited', 'poll', 'the', 'group', 'admin', 'you', 'to', 'and',
   'image', 'video', 'audio', 'sticker', 'gif', 'document', 'contact', 'location', 'live',
@@ -13,16 +14,149 @@ const WHATSAPP_SYSTEM_WORDS = new Set([
   'file', 'attached', 'jpg', 'jpeg', 'png', 'opus', 'pdf', 'mp3', 'mp4', 'avi', 'mov',
   'webp', 'docx', 'xlsx', 'pptx', 'txt', 'zip', 'rar', 'attachment', 'sent', 'received',
   
-  // Common pronouns and short words often in messages
+  // English common words
   'it', 'me', 'im', 'i', 'my', 'mine', 'we', 'us', 'our', 'ours', 'they', 'them', 'their',
   'so', 'is', 'are', 'am', 'be', 'been', 'was', 'were', 'will', 'would', 'can', 'could',
   'should', 'may', 'might', 'must', 'just', 'very', 'too', 'also', 'here', 'there',
-  
-  // Common words to filter in multiple languages
   'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
+  'he', 'she', 'his', 'her', 'him', 'has', 'have', 'had', 'do', 'does', 'did', 'get',
+  'got', 'go', 'went', 'come', 'came', 'see', 'saw', 'know', 'knew', 'think', 'thought',
+  'say', 'said', 'tell', 'told', 'want', 'wanted', 'make', 'made', 'take', 'took',
+  'give', 'gave', 'look', 'looked', 'use', 'used', 'find', 'found', 'work', 'worked',
+  'call', 'called', 'try', 'tried', 'ask', 'asked', 'need', 'needed', 'feel', 'felt',
+  'become', 'became', 'leave', 'left', 'put', 'keep', 'kept', 'let', 'begin', 'began',
+  'seem', 'seemed', 'help', 'helped', 'talk', 'talked', 'turn', 'turned', 'start', 'started',
+  'show', 'showed', 'hear', 'heard', 'play', 'played', 'run', 'ran', 'move', 'moved',
+  'live', 'lived', 'believe', 'believed', 'hold', 'held', 'bring', 'brought', 'happen',
+  'happened', 'write', 'wrote', 'provide', 'provided', 'sit', 'sat', 'stand', 'stood',
+  'lose', 'lost', 'pay', 'paid', 'meet', 'met', 'include', 'included', 'continue', 'continued',
+  'set', 'learn', 'learned', 'change', 'changed', 'lead', 'led', 'understand', 'understood',
+  'watch', 'watched', 'follow', 'followed', 'stop', 'stopped', 'create', 'created',
+  'speak', 'spoke', 'read', 'read', 'allow', 'allowed', 'add', 'added', 'spend', 'spent',
+  'grow', 'grew', 'open', 'opened', 'walk', 'walked', 'win', 'won', 'offer', 'offered',
+  'remember', 'remembered', 'love', 'loved', 'consider', 'considered', 'appear', 'appeared',
+  'buy', 'bought', 'wait', 'waited', 'serve', 'served', 'die', 'died', 'send', 'sent',
+  'expect', 'expected', 'build', 'built', 'stay', 'stayed', 'fall', 'fell', 'cut', 'cut',
+  'reach', 'reached', 'kill', 'killed', 'remain', 'remained', 'url',
+  
+  // Spanish common words
   'el', 'la', 'los', 'las', 'un', 'una', 'y', 'o', 'pero', 'en', 'sobre', 'para', 'de', 'con',
-  'le', 'la', 'les', 'et', 'ou', 'mais', 'sur', 'pour', 'de', 'avec',
-  'der', 'die', 'das', 'und', 'oder', 'aber', 'in', 'auf', 'für', 'von', 'mit'
+  'que', 'no', 'si', 'he', 'lo', 'es', 'ya', 'te', 'se', 'por', 'ha', 'mi', 'yo', 'esta',
+  'del', 'mas', 'al', 'voy', 'bien', 'muy', 'como', 'tu', 'estoy', 'min', 'tengo', 'ok', 'ahora',
+  'has', 'ver', 'eso', 'hay', 'dia', 'dias', 'su', 'sus', 'le', 'les', 'me', 'nos', 'os',
+  'uno', 'dos', 'tres', 'ser', 'estar', 'tener', 'hacer', 'poder', 'decir', 'ir', 'ver',
+  'dar', 'saber', 'querer', 'llegar', 'pasar', 'deber', 'poner', 'parecer', 'quedar',
+  'creer', 'hablar', 'llevar', 'dejar', 'seguir', 'encontrar', 'llamar', 'venir', 'pensar',
+  'salir', 'volver', 'tomar', 'conocer', 'vivir', 'sentir', 'tratar', 'mirar', 'contar',
+  'empezar', 'esperar', 'buscar', 'existir', 'entrar', 'trabajar', 'escribir', 'perder',
+  'producir', 'ocurrir', 'entender', 'pedir', 'recibir', 'recordar', 'terminar', 'permitir',
+  'aparecer', 'conseguir', 'comenzar', 'servir', 'sacar', 'necesitar', 'mantener', 'resultar',
+  'leer', 'caer', 'cambiar', 'presentar', 'crear', 'abrir', 'considerar', 'oír', 'acabar',
+  'convertir', 'ganar', 'formar', 'traer', 'partir', 'morir', 'aceptar', 'realizar', 'suponer',
+  'comprender', 'lograr', 'explicar', 'preguntar', 'tocar', 'reconocer', 'estudiar', 'alcanzar',
+  'nacer', 'dirigir', 'correr', 'utilizar', 'pagar', 'ayudar', 'gustar', 'jugar', 'escuchar',
+  
+  // French common words
+  'le', 'la', 'les', 'et', 'ou', 'mais', 'sur', 'pour', 'de', 'avec', 'ce', 'ces', 'un', 'une',
+  'des', 'du', 'dans', 'par', 'sans', 'sous', 'entre', 'vers', 'chez', 'depuis', 'pendant',
+  'avant', 'après', 'quand', 'comme', 'si', 'où', 'que', 'qui', 'quoi', 'dont', 'il', 'elle',
+  'ils', 'elles', 'je', 'tu', 'nous', 'vous', 'me', 'te', 'se', 'lui', 'leur', 'mon', 'ma',
+  'mes', 'ton', 'ta', 'tes', 'son', 'sa', 'ses', 'notre', 'nos', 'votre', 'vos', 'leur',
+  'leurs', 'ce', 'cette', 'cet', 'être', 'avoir', 'faire', 'dire', 'aller', 'voir', 'savoir',
+  'pouvoir', 'falloir', 'vouloir', 'venir', 'devoir', 'prendre', 'donner', 'mettre', 'partir',
+  'tenir', 'rester', 'sortir', 'passer', 'porter', 'suivre', 'vivre', 'entrer', 'parler',
+  'montrer', 'demander', 'trouver', 'rendre', 'devenir', 'laisser', 'comprendre', 'croire',
+  'sembler', 'paraître', 'connaître', 'commencer', 'finir', 'arriver', 'penser', 'aimer',
+  'regarder', 'attendre', 'entendre', 'perdre', 'répondre', 'changer', 'ouvrir', 'jouer',
+  'gagner', 'courir', 'marcher', 'écrire', 'lire', 'apprendre', 'garder', 'appeler', 'sentir',
+  'mourir', 'naître', 'acheter', 'poser', 'agir', 'servir', 'utiliser', 'tomber', 'créer',
+  'manquer', 'retrouver', 'porter', 'atteindre', 'décider', 'tuer', 'manger', 'oublier',
+  'chercher', 'obtenir', 'exister', 'expliquer', 'reconnaître', 'construire', 'élever',
+  'casser', 'tirer', 'fermer', 'voyager', 'continuer', 'prévoir', 'développer', 'maintenir',
+  
+  // German common words
+  'der', 'die', 'das', 'und', 'oder', 'aber', 'in', 'auf', 'für', 'von', 'mit', 'zu', 'an',
+  'bei', 'nach', 'aus', 'über', 'um', 'durch', 'gegen', 'ohne', 'unter', 'vor', 'zwischen',
+  'während', 'bis', 'seit', 'trotz', 'wegen', 'statt', 'außer', 'ich', 'du', 'er', 'sie',
+  'es', 'wir', 'ihr', 'sie', 'mich', 'dich', 'ihn', 'uns', 'euch', 'mir', 'dir', 'ihm',
+  'ihr', 'ihnen', 'mein', 'dein', 'sein', 'unser', 'euer', 'dieser', 'diese', 'dieses',
+  'jener', 'jene', 'jenes', 'welcher', 'welche', 'welches', 'sein', 'haben', 'werden',
+  'können', 'müssen', 'sollen', 'wollen', 'dürfen', 'mögen', 'gehen', 'kommen', 'sehen',
+  'machen', 'geben', 'nehmen', 'wissen', 'sagen', 'denken', 'finden', 'lassen', 'bleiben',
+  'stehen', 'liegen', 'sitzen', 'fahren', 'laufen', 'sprechen', 'hören', 'fragen', 'zeigen',
+  'bringen', 'holen', 'kaufen', 'verkaufen', 'essen', 'trinken', 'schlafen', 'arbeiten',
+  'spielen', 'lernen', 'lehren', 'verstehen', 'erklären', 'helfen', 'beginnen', 'aufhören',
+  'öffnen', 'schließen', 'schreiben', 'lesen', 'vergessen', 'erinnern', 'treffen', 'kennen',
+  'leben', 'sterben', 'geboren', 'wachsen', 'fallen', 'steigen', 'ziehen', 'drücken',
+  'werfen', 'fangen', 'schneiden', 'bauen', 'zerstören', 'reparieren', 'putzen', 'waschen',
+  'kochen', 'backen', 'singen', 'tanzen', 'zeichnen', 'malen', 'fotografieren', 'filmen',
+  
+  // Hindi common words (romanized)
+  'main', 'mein', 'tu', 'tum', 'aap', 'yeh', 'woh', 'is', 'us', 'ka', 'ki', 'ke', 'ko',
+  'se', 'mein', 'par', 'tak', 'aur', 'ya', 'lekin', 'kyunki', 'agar', 'toh', 'phir',
+  'abhi', 'ab', 'kabhi', 'kya', 'kaun', 'kahan', 'kaise', 'kyun', 'jab', 'tab', 'kal',
+  'aaj', 'kal', 'subah', 'sham', 'raat', 'din', 'saal', 'mahina', 'hafta', 'ghanta',
+  'minute', 'second', 'paisa', 'rupaya', 'ghar', 'office', 'school', 'college', 'university',
+  'hospital', 'market', 'shop', 'restaurant', 'hotel', 'station', 'airport', 'bus', 'train',
+  'car', 'bike', 'auto', 'taxi', 'rickshaw', 'metro', 'kaam', 'karna', 'hona', 'jaana',
+  'aana', 'dekhna', 'sunna', 'bolna', 'kehna', 'samjhna', 'sikhna', 'padhna', 'likhna',
+  'khana', 'peena', 'sona', 'uthna', 'baithna', 'khada', 'chalna', 'daurna', 'uthana',
+  'rakhna', 'lena', 'dena', 'bhejana', 'lana', 'jana', 'milna', 'banana', 'bigadna',
+  
+  // Norwegian common words
+  'jeg', 'du', 'han', 'hun', 'det', 'vi', 'dere', 'de', 'meg', 'deg', 'ham', 'henne',
+  'oss', 'dem', 'min', 'din', 'hans', 'hennes', 'vår', 'deres', 'denne', 'dette', 'den',
+  'og', 'eller', 'men', 'i', 'på', 'til', 'for', 'av', 'med', 'om', 'fra', 'over',
+  'under', 'ved', 'etter', 'før', 'når', 'hvor', 'hvorfor', 'hvordan', 'hva', 'hvem',
+  'være', 'ha', 'gjøre', 'si', 'gå', 'komme', 'se', 'vite', 'kunne', 'skulle', 'ville',
+  'måtte', 'få', 'ta', 'gi', 'bli', 'finne', 'tenke', 'tro', 'føle', 'høre', 'snakke',
+  'spørre', 'svare', 'fortelle', 'vise', 'begynne', 'slutte', 'åpne', 'lukke', 'lese',
+  'skrive', 'lære', 'forstå', 'huske', 'glemme', 'møte', 'kjenne', 'elske', 'like',
+  'hate', 'leve', 'dø', 'fødes', 'vokse', 'falle', 'sitte', 'stå', 'ligge', 'løpe',
+  'kjøre', 'fly', 'reise', 'arbeide', 'spille', 'synge', 'danse', 'tegne', 'male',
+  
+  // Italian common words
+  'il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', 'e', 'o', 'ma', 'però',
+  'in', 'su', 'per', 'di', 'da', 'con', 'tra', 'fra', 'sopra', 'sotto', 'dentro',
+  'fuori', 'davanti', 'dietro', 'accanto', 'vicino', 'lontano', 'prima', 'dopo',
+  'durante', 'quando', 'dove', 'come', 'perché', 'che', 'chi', 'cosa', 'quale',
+  'quanto', 'io', 'tu', 'lui', 'lei', 'noi', 'voi', 'loro', 'mi', 'ti', 'lo', 'la',
+  'ci', 'vi', 'li', 'le', 'gli', 'mio', 'tuo', 'suo', 'nostro', 'vostro', 'loro',
+  'questo', 'questa', 'quello', 'quella', 'essere', 'avere', 'fare', 'dire', 'andare',
+  'vedere', 'sapere', 'dare', 'stare', 'venire', 'dovere', 'potere', 'volere', 'uscire',
+  'partire', 'tornare', 'rimanere', 'diventare', 'entrare', 'portare', 'mettere',
+  'sentire', 'parlare', 'arrivare', 'passare', 'vivere', 'morire', 'nascere', 'crescere',
+  'cadere', 'alzare', 'aprire', 'chiudere', 'leggere', 'scrivere', 'imparare', 'insegnare',
+  'capire', 'spiegare', 'aiutare', 'lavorare', 'giocare', 'cantare', 'ballare', 'disegnare',
+  
+  // Portuguese common words
+  'o', 'a', 'os', 'as', 'um', 'uma', 'uns', 'umas', 'e', 'ou', 'mas', 'em', 'no',
+  'na', 'nos', 'nas', 'para', 'por', 'de', 'do', 'da', 'dos', 'das', 'com', 'sem',
+  'sobre', 'sob', 'entre', 'contra', 'até', 'desde', 'durante', 'antes', 'depois',
+  'quando', 'onde', 'como', 'porque', 'que', 'quem', 'qual', 'quanto', 'eu', 'tu',
+  'ele', 'ela', 'nós', 'vós', 'eles', 'elas', 'me', 'te', 'se', 'nos', 'vos', 'lhe',
+  'lhes', 'meu', 'teu', 'seu', 'nosso', 'vosso', 'este', 'esta', 'esse', 'essa',
+  'aquele', 'aquela', 'ser', 'estar', 'ter', 'haver', 'fazer', 'dizer', 'ir', 'ver',
+  'dar', 'saber', 'poder', 'querer', 'vir', 'dever', 'pôr', 'ficar', 'chegar', 'passar',
+  'deixar', 'parecer', 'falar', 'trazer', 'levar', 'encontrar', 'pensar', 'sentir',
+  'viver', 'morrer', 'nascer', 'crescer', 'cair', 'subir', 'descer', 'entrar', 'sair',
+  'voltar', 'partir', 'começar', 'acabar', 'abrir', 'fechar', 'ler', 'escrever',
+  'aprender', 'ensinar', 'entender', 'explicar', 'ajudar', 'trabalhar', 'jogar',
+  'cantar', 'dançar', 'desenhar', 'pintar',
+  
+  // Dutch common words
+  'de', 'het', 'een', 'en', 'of', 'maar', 'in', 'op', 'voor', 'van', 'met', 'aan',
+  'bij', 'naar', 'uit', 'over', 'onder', 'tussen', 'door', 'tegen', 'zonder', 'vanaf',
+  'tijdens', 'voordat', 'nadat', 'wanneer', 'waar', 'hoe', 'waarom', 'wat', 'wie',
+  'welke', 'hoeveel', 'ik', 'jij', 'hij', 'zij', 'wij', 'jullie', 'me', 'je', 'hem',
+  'haar', 'ons', 'hun', 'mijn', 'jouw', 'zijn', 'ons', 'onze', 'deze', 'die', 'dat',
+  'zijn', 'hebben', 'doen', 'zeggen', 'gaan', 'komen', 'zien', 'weten', 'kunnen',
+  'moeten', 'willen', 'mogen', 'krijgen', 'geven', 'maken', 'worden', 'blijven',
+  'liggen', 'staan', 'zitten', 'lopen', 'rijden', 'vliegen', 'spreken', 'horen',
+  'vragen', 'antwoorden', 'vertellen', 'laten', 'beginnen', 'stoppen', 'openen',
+  'sluiten', 'lezen', 'schrijven', 'leren', 'begrijpen', 'vergeten', 'herinneren',
+  'ontmoeten', 'kennen', 'houden', 'leven', 'sterven', 'geboren', 'groeien', 'vallen',
+  'werken', 'spelen', 'zingen', 'dansen', 'tekenen', 'schilderen'
 ])
 
 function isNonLatinChar(char: string): boolean {
