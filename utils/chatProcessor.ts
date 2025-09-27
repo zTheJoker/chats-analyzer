@@ -133,20 +133,20 @@ export interface ChatData {
 }
 
 const MESSAGE_PATTERNS = [
-  // Standard WhatsApp format with RTL support: [date], [time] - [user]: [message]
-  /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*[-–]\s*(.*?):\s*(.+)$/,
+  // Standard WhatsApp format with RTL support and AM/PM: [date], [time AM/PM] - [user]: [message]
+  /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\]?\s*[-–]\s*(.*?):\s*(.+)$/i,
   
-  // WhatsApp format with optional brackets: [date] [time] [user]: [message]
-  /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*(.*?):\s*(.+)$/,
+  // WhatsApp format with optional brackets and AM/PM: [date] [time AM/PM] [user]: [message]
+  /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\]?\s*(.*?):\s*(.+)$/i,
   
-  // WhatsApp format with date/time without brackets: MM/DD/YY, HH:MM - User: Message
-  /^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s*(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–]\s*(.*?):\s*(.+)$/,
+  // WhatsApp format with date/time without brackets and AM/PM: MM/DD/YY, HH:MM AM/PM - User: Message
+  /^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\s*[-–]\s*(.*?):\s*(.+)$/i,
   
-  // Hebrew/RTL format with square brackets: [DD/MM/YYYY, HH:MM:SS] User: Message
-  /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),\s*(\d{1,2}:\d{2}(?::\d{2})?)\]\s*(.*?):\s*(.+)$/,
+  // Hebrew/RTL format with square brackets and AM/PM: [DD/MM/YYYY, HH:MM:SS AM/PM] User: Message
+  /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),\s*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\]\s*(.*?):\s*(.+)$/i,
   
-  // System message format: [date], [time] - [message]
-  /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s*[-–]?\s*(.+)$/
+  // System message format with AM/PM: [date], [time AM/PM] - [message]
+  /^[\u200E\u200F]?\[?(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{2,4})[,\]]?,?\s*[\u200E\u200F]?\[?(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\]?\s*[-–]?\s*(.+)$/i
 ];
 
 function parseDate(dateString: string): Date | null {
@@ -230,6 +230,14 @@ function cleanWhatsAppFormatting(text: string): string {
     .trim();
 }
 
+function cleanUsername(username: string): string {
+  return username
+    .replace(/\s*(AM|PM)\s*\]?$/i, '')           // Remove trailing AM/PM and optional bracket
+    .replace(/^\[+|\]+$/g, '')                   // Remove leading/trailing brackets
+    .replace(/[\u200E\u200F\u202A-\u202E]/g, '') // Remove RTL/LTR markers
+    .trim();
+}
+
 function cleanupText(text: string): string {
   // Remove control characters but preserve RTL text
   return text
@@ -284,16 +292,37 @@ function parseDateTime(dateStr: string, timeStr: string): Date | null {
       return null;
     }
     
+    // Clean the time string and check for AM/PM
+    const cleanTimeStr = timeStr.trim();
+    const isAM = /\bAM\b/i.test(cleanTimeStr);
+    const isPM = /\bPM\b/i.test(cleanTimeStr);
+    
+    // Remove AM/PM from time string before parsing
+    const timeOnly = cleanTimeStr.replace(/\s*(AM|PM)\s*/i, '');
+    
     // Parse the time component
-    const timeParts = timeStr.split(':').map(part => parseInt(part, 10));
+    const timeParts = timeOnly.split(':').map(part => parseInt(part, 10));
     if (timeParts.length < 2 || timeParts.some(isNaN)) {
       console.warn('Invalid time format:', timeStr);
       return null;
     }
     
-    const hours = timeParts[0];
+    let hours = timeParts[0];
     const minutes = timeParts[1];
     const seconds = timeParts.length > 2 ? timeParts[2] : 0;
+    
+    // Handle 12-hour format conversion
+    if (isPM && hours !== 12) {
+      hours += 12;
+    } else if (isAM && hours === 12) {
+      hours = 0;
+    }
+    
+    // Validate hours are in valid range
+    if (hours < 0 || hours > 23) {
+      console.warn('Invalid hour value:', hours, 'from', timeStr);
+      return null;
+    }
     
     // Set the time on our parsed date
     parsedDate.setHours(hours, minutes, seconds);
@@ -362,7 +391,7 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
             [, date, time, user, message] = match
             date = cleanWhatsAppFormatting(date)
             time = cleanWhatsAppFormatting(time)
-            user = cleanWhatsAppFormatting(user)
+            user = cleanUsername(cleanWhatsAppFormatting(user))
             message = cleanWhatsAppFormatting(message)
           } else if (match.length === 4) {
             // System message
@@ -428,7 +457,7 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       }
 
       // Clean up user name and message
-      user = cleanupText(user.trim())
+      user = cleanUsername(cleanupText(user.trim()))
       message = cleanupText(message.trim())
       const normalizedDate = format(parsedDate, 'dd/MM/yyyy')
 
