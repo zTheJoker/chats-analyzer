@@ -621,9 +621,19 @@ export async function processWhatsAppChat(chatText: string): Promise<ChatData> {
       messageCountByDate[normalizedDate] = (messageCountByDate[normalizedDate] || 0) + 1
       userMessageCountByDate[user][normalizedDate] = (userMessageCountByDate[user][normalizedDate] || 0) + 1
 
-      const hour = parseInt(time.split(':')[0], 10)
-      if (!isNaN(hour) && hour >= 0 && hour <= 23) {
-        messagesByHour[hour]++
+      // Use the proper parseDateTime function to handle 12-hour format correctly
+      const fullDateTime = parseDateTime(date, time)
+      if (fullDateTime) {
+        const hour = fullDateTime.getHours()
+        if (hour >= 0 && hour <= 23) {
+          messagesByHour[hour]++
+        }
+      } else {
+        // Fallback to the old method if parseDateTime fails
+        const hour = parseInt(time.split(':')[0], 10)
+        if (!isNaN(hour) && hour >= 0 && hour <= 23) {
+          messagesByHour[hour]++
+        }
       }
 
       // Process words for frequency using our improved method
